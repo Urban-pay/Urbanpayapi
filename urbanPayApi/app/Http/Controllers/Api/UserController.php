@@ -9,8 +9,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\Exists;
-use Illuminate\Support\Facades\Session;
+// use Illuminate\Validation\Rules\Exists;
+// use Illuminate\Support\Facades\Session;
+// use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis; // Import the Redis facade
+
 
 class UserController extends Controller
 {
@@ -52,8 +55,9 @@ class UserController extends Controller
                     'password' => Hash::make($request->password),
                     'pin' => Hash::make($request->pin)
                 ]);
+                Redis::set('email', $request->email);
+                // Cache::put('email', $request->email);
 
-                Session::put('email', $request->email);
 
                 return response()->json([
                     'status' => true,
@@ -106,13 +110,16 @@ class UserController extends Controller
             }
 
             $user = User::where('email', $request->email)->first();
-            Session::put('email', $request->email);
 
-            return response()->json([
-                'status' => true,
-                'message' => 'User Logged In Successfully',
-                'token' => $user->createToken("API TOKEN")->plainTextToken
-            ], 200);
+            $email = Redis::set('email', $request->email);
+            return response()->json(['message' => $email], 200);
+
+
+            // return response()->json([
+            //     'status' => true,
+            //     'message' => 'User Logged In Successfully',
+            //     'token' => $user->createToken("API TOKEN")->plainTextToken
+            // ], 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -124,7 +131,8 @@ class UserController extends Controller
     public function pin(Request $request)
     {
         try {
-            $email = Session::get('email');
+            $email = Redis::get('email');
+            // return response()->json(['message' => $email], 200);
 
             $user =  User::where('email', $email)->exists();
             // if (Session::get('email')) {
@@ -140,7 +148,7 @@ class UserController extends Controller
                     if ($user) {
                         # code...
                         if ($request->pin == $user->pin) {
-                            Session::forget('key');
+                            // session()->forget('key');
                             // User and pin are valid
                             return response()->json(['message' => 'Email and pin are valid.'], 200);
                             # code...
