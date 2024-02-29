@@ -128,18 +128,18 @@ class UserController extends Controller
 
             $user =  User::where('email', $email)->exists();
             // if (Session::get('email')) {
-                # code... 
+                # code...
                 $request->validate([
                     'pin' => 'required'
                 ], [
                     'pin' => 'pin is required',
                 ]);
 
-                if (strlen($user->pin) == 5) {
+                if (strlen($request->pin) == 5) {
                     # code...
                     if ($user) {
                         # code...
-                        if ($user->pin == $user->pin) {
+                        if ($request->pin == $user->pin) {
                             Session::forget('key');
                             // User and pin are valid
                             return response()->json(['message' => 'Email and pin are valid.'], 200);
