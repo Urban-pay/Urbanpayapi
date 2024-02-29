@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 // use Illuminate\Validation\Rules\Exists;
-// use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Session;
 // use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Redis; // Import the Redis facade
+// use Illuminate\Support\Facades\Redis; // Import the Redis facade
 
 
 class UserController extends Controller
@@ -55,7 +55,7 @@ class UserController extends Controller
                     'password' => Hash::make($request->password),
                     'pin' => Hash::make($request->pin)
                 ]);
-                Redis::set('email', $request->email);
+                Session::set('email', $request->email);
                 // Cache::put('email', $request->email);
 
 
@@ -111,7 +111,7 @@ class UserController extends Controller
 
             $user = User::where('email', $request->email)->first();
 
-            $email = Redis::set('email', $request->email);
+            $email = Session::put('email', $request->email);
             return response()->json(['message' => $email], 200);
 
 
@@ -131,7 +131,7 @@ class UserController extends Controller
     public function pin(Request $request)
     {
         try {
-            $email = Redis::get('email');
+            $email = Session::get('email');
             // return response()->json(['message' => $email], 200);
 
             $user =  User::where('email', $email)->exists();
