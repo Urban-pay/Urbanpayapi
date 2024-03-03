@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OtpVerificationMail;
 
 
 
@@ -52,8 +54,6 @@ class UserController extends Controller
                     'message' => 'pin must be 5 digits'
                 ], 500);
             }
-            return response()->json(['message' => 'User registered successfully', 'user' => $user]);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -83,9 +83,25 @@ class UserController extends Controller
                 return response()->json(['token' => $token, 'user' => $user]);
             }
 
+            $user = User::where('email', $request->email)->first();
 
+            if (!$user) {
+                return response()->json(['message' => 'User not found'], 404);
+            }
 
-            return response()->json(['message' => 'Unauthorized'], 401);
+            // Generate random OTP
+            $otp = mt_rand(100000, 999999);
+
+            // Store OTP in the database with the user's email
+            $user->otp = $otp;
+            $user->save();
+
+            // Send email to user containing the OTP
+            Mail::to($user->email)->send(new OtpVerificationMail($otp));
+
+            return response()->json(['message' => 'OTP sent successfully']);
+
+            // return response()->json(['message' => 'Unauthorized'], 401);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -105,13 +121,13 @@ class UserController extends Controller
                 $credentials = $request->validate([
                     'pin' => 'required|string',
                 ]);
-        
+
                 $user = User::where('email', $email)->first();
-        
+
                 if (!$user || !password_verify($credentials['pin'], $user->pin)) {
                     return response()->json(['message' => 'Invalid email or PIN'], 401);
                 }
-        
+
                 // User is authenticated, return success response
                 return response()->json(['message' => 'Login successful', 'user' => $user]);
             } else {
@@ -120,8 +136,6 @@ class UserController extends Controller
                     'message' => 'email required',
                 ]);
             }
-
-        
         } catch (\Throwable $e) {
             # code...
             return response()->json([
@@ -130,5 +144,26 @@ class UserController extends Controller
             ], 500);
         }
         # code...
+    }
+
+
+    public function verifyOtp(Request $request)
+    {
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        if ($request->otp == $user->otp) {
+            // OTP is valid
+            // Perform necessary actions (e.g., mark email as verified)
+            $user->email_verified_at = now();
+            $user->save();
+            return response()->json(['message' => 'OTP verified successfully']);
+        } else {
+            // OTP is invalid
+            return response()->json(['message' => 'Invalid OTP'], 401);
+        }
     }
 }

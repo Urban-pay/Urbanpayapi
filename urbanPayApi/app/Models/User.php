@@ -18,5 +18,6 @@ class user extends Authenticatable
         'phoneno',
         'password',
         'pin',
+        'otp',
     ];
 }

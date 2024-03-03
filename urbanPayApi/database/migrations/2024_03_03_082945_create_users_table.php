@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('phoneno');
             $table->string('password');
             $table->string('pin');
+            $table->string('otp');
             $table->timestamps();
         });
     }
