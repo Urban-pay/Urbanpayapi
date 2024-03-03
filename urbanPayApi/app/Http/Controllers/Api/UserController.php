@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 
-use App\Models\userr;
+use App\Models\user;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -12,69 +12,48 @@ use Illuminate\Support\Facades\Validator;
 
 
 
+
+
 class UserController extends Controller
 {
     /**
      * Create User
      * @param Request $request
-     * @return userr
+     * @return user
      */
     public function createUser(Request $request)
     {
         try {
-            //Validated
-            $validateUser = Validator::make(
-                $request->all(),
-                [
-                    'name' => 'nullable',
-                    'email' => 'nullable|email|unique:users,email',
-                    'username' => 'nullable',
-                    'phoneno' => 'nullable',
-                    'pin' => 'nullable',
-                    'password' => 'nullable'
-                ]
-            );
+            $validatedData = $request->validate([
+                'name' => 'nullable|string|max:255',
+                'email' => 'nullable|string|email|max:255|unique:users',
+                'username' => 'nullable|string|max:255',
+                'phoneno' => 'nullable|max:255',
+                'password' => 'nullable',
+                'pin' => 'nullable|string'
+            ]);
 
             if (strlen($request->pin) == 5) {
-                if ($validateUser->fails()) {
-                    return response()->json([
-                        'status' => false,
-                        'message' => 'validation error',
-                        'errors' => $validateUser->errors()
-                    ], 401);
-                }
+                $user = User::create([
+                    'name' => $validatedData['name'],
+                    'email' => $validatedData['email'],
+                    'username' => $validatedData['username'],
+                    'phoneno' => $validatedData['phoneno'],
+                    'password' => Hash::make($validatedData['password']),
+                    'pin' => Hash::make($validatedData['pin'])
+                ]);
 
-                
-                $user = new userr;
-                $user->name = $request->name;
-                $user->email = $request->email;
-                $user->username = $request->username;
-                $user->phoneno = $request->phoneno;
-                $user->password = Hash::make($request->password);
-                $user->pin = Hash::make($request->pin);
-
-                $user->save();
-                // $user = userr::create([
-                //     'name' => $request->name,
-                //     'email' => $request->email,
-                //     'username' => $request->username,
-                //     'phoneno' => $request->phoneno,
-                //     'password' => Hash::make($request->password),
-                //     'pin' => Hash::make($request->pin)
-                // ]);
-                // Storing data in session
-                // session(['email' => $request->email]);
-                return response()->json([
-                    'status' => true,
-                    'message' => 'User Created Successfully',
-                    'token' => $user->createToken("API TOKEN")->plainTextToken
-                ], 200);
+                $request->session()->put('email', $user->email);
+                $token = $user->createToken('AuthToken')->plainTextToken;
+                return response()->json(['token' => $token, 'user' => $user]);
             } else {
                 return response()->json([
                     'status' => 401,
                     'message' => 'pin must be 5 digits'
                 ], 500);
             }
+            return response()->json(['message' => 'User registered successfully', 'user' => $user]);
+
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -86,46 +65,27 @@ class UserController extends Controller
     /**
      * Login The User
      * @param Request $request
-     * @return userr
+     * @return user
      */
     public function loginUser(Request $request)
     {
         try {
-            $validateUser = Validator::make(
-                $request->all(),
-                [
-                    'email' => 'required|email',
-                    'password' => 'required'
-                ]
-            );
 
-            if ($validateUser->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'validation error',
-                    'errors' => $validateUser->errors()
-                ], 401);
-            }
+            $credentials = $request->validate([
+                'email' => 'required|string|email',
+                'password' => 'required|string',
+            ]);
 
-            if (!Auth::attempt($request->only(['email', 'password']))) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Email & Password does not match with our record.',
-                ], 401);
+            if (Auth::attempt($credentials)) {
+                $user = Auth::user();
+                $request->session()->put('email', $user->email);
+                $token = $user->createToken('AuthToken')->plainTextToken;
+                return response()->json(['token' => $token, 'user' => $user]);
             }
 
 
-            $user = userr::where('email', $request->email)->first();
-            $email = session(['email' => $request->email]);
 
-            // return response()->json(['message' => dump(session()->all())], 200);
-
-
-            return response()->json([
-                'status' => true,
-                'message' => 'User Logged In Successfully',
-                'token' => $user->createToken("API TOKEN")->plainTextToken
-            ], 200);
+            return response()->json(['message' => 'Unauthorized'], 401);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -138,51 +98,30 @@ class UserController extends Controller
     {
         try {
 
-            // Retrieving data from session
-            $email = session('email');
+            $email = $request->session()->get('email');
 
-            // return response()->json(['message' => $email], 200);
-
-            $user =  userr::where('email', $email)->exists();
-            // if (Session::get('email')) {
-            # code...
-            $request->validate([
-                'pin' => 'required'
-            ], [
-                'pin' => 'pin is required',
-            ]);
-
-            if (strlen($request->pin) == 5) {
+            if ($email) {
                 # code...
-                if ($user) {
-                    # code...
-                    if ($request->pin == $user->pin) {
-                        // Removing data from session
-                        session()->forget('email');
-
-                        // User and pin are valid
-                        return response()->json(['message' => 'Email and pin are valid.'], 200);
-                        # code...
-                    } else {
-                        // User or pin is invalid
-                        return response()->json(['message' => 'Invalid email or pin.'], 401);
-                    }
-                } else {
-                    return response()->json(['message' => 'invalid email'], 401);
+                $credentials = $request->validate([
+                    'pin' => 'required|string',
+                ]);
+        
+                $user = User::where('email', $email)->first();
+        
+                if (!$user || !password_verify($credentials['pin'], $user->pin)) {
+                    return response()->json(['message' => 'Invalid email or PIN'], 401);
                 }
+        
+                // User is authenticated, return success response
+                return response()->json(['message' => 'Login successful', 'user' => $user]);
             } else {
+                # code...
                 return response()->json([
-                    'status' => 401,
-                    'message' => 'pin must be 5 digits'
+                    'message' => 'email required',
                 ]);
             }
-            // } else {
-            //     # code...
-            //     return response()->json([
-            //         'status' => 401,
-            //         'message' => 'email is required'
-            //     ], 500);
-            // }
+
+        
         } catch (\Throwable $e) {
             # code...
             return response()->json([
