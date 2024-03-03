@@ -3,16 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 
-use App\Models\User;
+use App\Models\userr;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-// use Illuminate\Validation\Rules\Exists;
-use Illuminate\Support\Facades\Session;
-// use Illuminate\Support\Facades\Cache;
-// use Illuminate\Support\Facades\Redis; // Import the Redis facade
+
 
 
 class UserController extends Controller
@@ -20,7 +17,7 @@ class UserController extends Controller
     /**
      * Create User
      * @param Request $request
-     * @return User
+     * @return userr
      */
     public function createUser(Request $request)
     {
@@ -47,18 +44,26 @@ class UserController extends Controller
                     ], 401);
                 }
 
-                $user = User::create([
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'username' => $request->username,
-                    'phoneno' => $request->phoneno,
-                    'password' => Hash::make($request->password),
-                    'pin' => Hash::make($request->pin)
-                ]);
-                Session::set('email', $request->email);
-                // Cache::put('email', $request->email);
+                
+                $user = new userr;
+                $user->name = $request->name;
+                $user->email = $request->email;
+                $user->username = $request->username;
+                $user->phoneno = $request->phoneno;
+                $user->password = Hash::make($request->password);
+                $user->pin = Hash::make($request->pin);
 
-
+                $user->save();
+                // $user = userr::create([
+                //     'name' => $request->name,
+                //     'email' => $request->email,
+                //     'username' => $request->username,
+                //     'phoneno' => $request->phoneno,
+                //     'password' => Hash::make($request->password),
+                //     'pin' => Hash::make($request->pin)
+                // ]);
+                // Storing data in session
+                // session(['email' => $request->email]);
                 return response()->json([
                     'status' => true,
                     'message' => 'User Created Successfully',
@@ -81,7 +86,7 @@ class UserController extends Controller
     /**
      * Login The User
      * @param Request $request
-     * @return User
+     * @return userr
      */
     public function loginUser(Request $request)
     {
@@ -109,17 +114,18 @@ class UserController extends Controller
                 ], 401);
             }
 
-            $user = User::where('email', $request->email)->first();
 
-            $email = Session::put('email', $request->email);
-            return response()->json(['message' => $email], 200);
+            $user = userr::where('email', $request->email)->first();
+            $email = session(['email' => $request->email]);
+
+            // return response()->json(['message' => dump(session()->all())], 200);
 
 
-            // return response()->json([
-            //     'status' => true,
-            //     'message' => 'User Logged In Successfully',
-            //     'token' => $user->createToken("API TOKEN")->plainTextToken
-            // ], 200);
+            return response()->json([
+                'status' => true,
+                'message' => 'User Logged In Successfully',
+                'token' => $user->createToken("API TOKEN")->plainTextToken
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -131,40 +137,45 @@ class UserController extends Controller
     public function pin(Request $request)
     {
         try {
-            $email = Session::get('email');
+
+            // Retrieving data from session
+            $email = session('email');
+
             // return response()->json(['message' => $email], 200);
 
-            $user =  User::where('email', $email)->exists();
+            $user =  userr::where('email', $email)->exists();
             // if (Session::get('email')) {
-                # code...
-                $request->validate([
-                    'pin' => 'required'
-                ], [
-                    'pin' => 'pin is required',
-                ]);
+            # code...
+            $request->validate([
+                'pin' => 'required'
+            ], [
+                'pin' => 'pin is required',
+            ]);
 
-                if (strlen($request->pin) == 5) {
+            if (strlen($request->pin) == 5) {
+                # code...
+                if ($user) {
                     # code...
-                    if ($user) {
+                    if ($request->pin == $user->pin) {
+                        // Removing data from session
+                        session()->forget('email');
+
+                        // User and pin are valid
+                        return response()->json(['message' => 'Email and pin are valid.'], 200);
                         # code...
-                        if ($request->pin == $user->pin) {
-                            // session()->forget('key');
-                            // User and pin are valid
-                            return response()->json(['message' => 'Email and pin are valid.'], 200);
-                            # code...
-                        } else {
-                            // User or pin is invalid
-                            return response()->json(['message' => 'Invalid email or pin.'], 401);
-                        }
                     } else {
-                        return response()->json(['message' => 'invalid email'], 401);
+                        // User or pin is invalid
+                        return response()->json(['message' => 'Invalid email or pin.'], 401);
                     }
                 } else {
-                    return response()->json([
-                        'status' => 401,
-                        'message' => 'pin must be 5 digits'
-                    ]);
+                    return response()->json(['message' => 'invalid email'], 401);
                 }
+            } else {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'pin must be 5 digits'
+                ]);
+            }
             // } else {
             //     # code...
             //     return response()->json([
