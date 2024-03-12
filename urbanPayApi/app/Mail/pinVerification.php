@@ -2,19 +2,20 @@
 
 namespace App\Mail;
 
-use Illuminate\Mail\Mailables\Address;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Address;
 
-class OtpVerificationMail extends Mailable
+
+class pinVerification extends Mailable
 {
     use Queueable, SerializesModels;
 
-        public $otp;
+        Public $otp;
     /**
      * Create a new message instance.
      */
@@ -31,7 +32,7 @@ class OtpVerificationMail extends Mailable
     {
         return new Envelope(
             from: new Address('distressproperties@uptechng.com', 'Adejumobi Toluwanimi'),
-            subject: 'Otp Verification Mail',
+            subject: 'Pin Verification',
         );
     }
 
@@ -41,7 +42,7 @@ class OtpVerificationMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email/otp_verification',
+            view: 'email/pinVerification',
         );
     }
 

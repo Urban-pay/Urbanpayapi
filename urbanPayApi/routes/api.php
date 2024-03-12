@@ -22,4 +22,12 @@ use App\Http\Controllers\Api\UserController;
 
 Route::post('/auth/register', [UserController::class, 'createUser']);
 Route::post('/auth/login', [UserController::class, 'loginUser']);
+Route::post('/auth/verifyOtp', [UserController::class, 'verifyOtp']);
 Route::post('/auth/pin', [UserController::class, 'pin']);
+Route::delete('/auth/deleteUser/{id}', [UserController::class, 'deleteUser']);
+Route::get('/auth/singleUser/{id}', [UserController::class, 'singleUser']);
+Route::put('/auth/updateUserProfile/', [UserController::class, 'updateUserProfile']);
+Route::post('/auth/updateUserProfilePinVerify/', [UserController::class, 'updateUserProfilePinVerify']);
+Route::post('/auth/updateUserProfilePasswordVerify/', [UserController::class, 'updateUserProfilePasswordVerify']);
+Route::put('/auth/updateUserProfilePin/', [UserController::class, 'updateUserProfilePin']);
+Route::put('/auth/updateUserProfilePassword/', [UserController::class, 'updateUserProfilePassword']);
