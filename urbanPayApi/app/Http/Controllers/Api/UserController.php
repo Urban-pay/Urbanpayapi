@@ -32,6 +32,7 @@ class UserController extends Controller
      * @param Request $request
      * @return user
      */
+
     public function createUser(Request $request)
     {
         try {
@@ -91,51 +92,76 @@ class UserController extends Controller
                 // Define your headers
                 $headers = [
                     'Content-Type' => 'application/json',
-                    'Authorization' => 'SCSec-L-9c0e1ac4b4fc4ee88b23276a091d7a02'
+                    'Authorization' => 'SCSec-L-8e2b1b217e4b451685f19bf9d0e0b077'
                 ];
-        
+
                 // Data to be sent in the request body
                 $data = [
                     'account_name' => $user->name,
                     'email' => $user->email
                     // Add more key-value pairs as needed
                 ];
-        
+
                 try {
+
+
+
                     // Make the API request with headers and request body
                     $response = $client->request('POST', 'https://sagecloud.ng/api/v3/virtual-account/generate', [
                         'headers' => $headers,
                         'json' => $data
                     ]);
-        
+
                     $statusCode = $response->getStatusCode();
                     $responseData = $response->getBody()->getContents();
-                    $responseDataArray = json_decode($responseData,true);
+                    $responseDataArray = json_decode($responseData, true);
 
 
+
+                    // api balance request
+                    $headers = [
+                        'Content-Type' => 'application/json',
+                        'Authorization' => 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI1IiwianRpIjoiZGNkZjhjM2M2ZTNmOTY4MGY3ZjFhYzY0NGU2MGZiZjNlNTVkNzkzNjZhMjc2YmQzM2U2NWI1MTZiM2UxYjdlYzIwYjAwMzM4M2QzNzYxNjYiLCJpYXQiOjE3MTA2NzYxODQuMDQ4OCwibmJmIjoxNzEwNjc2MTg0LjA0ODgwNCwiZXhwIjoxNzEwNzYyNTg0LjAzNDIyMywic3ViIjoiNDMzIiwic2NvcGVzIjpbIioiXX0.Kz1gt-MJXtw9iMTS_D6shAqYOslcCVUs8jDUuQlNbVkbNCSFOnqBlf7CoQLTNVqvK2j3FJP6O-5u6458a2pknnRqHKrbSkQokwTzolaYj5lGvIqVSvel16yYSInPprR14QvU6Q50C3qtLyRyDg_sASUPeFZkaX7CSuJB9a2Secue3_ywbW3m2XuH2890wUc5mSf6pKMokRaDBnRGwBdTnhfgXwqAnUgdgm0ESTUj5Y8UJ-5Z_j8bC8Afpcd4T7SazjCF3rZ7tzhT_fumCFvrPditsCJbqxOKD0WErcSseSAX_Yh32EiZSwLNu1s45NkjaIyJol4C8oWrOjpEoRq5D7EYUXGS6dbbSNZSraTQrBkyDsUOddr3vtsABU3TLvpLrzU15ERtweQiGM5R0ssCWj9MaScQDgiy9KCa6A8IHUNRsq3aHMmnUrqFppkw37yCkpsXKfnYAmYRVGD1V7-r3mjSUQU8AdFumpFwFb9cJPknsXNkAdEvJig7N8FolXtD8sTPayH1fl_P69hVkM7WwXDtPMIuZgs0Z1xInTbsROzNxnkxGI5R1W2aBqOlm0R21cpQnLCA6M-MA2HiIYkYSSryIOPySVPyRAUZQlcfVl1yxAJFtDA-GbHy-LiV1pR-lbqLbFvSR4AAy6CjBTmNDmoZd6_uhaUrdHDMslWSHFE'
+                    ];
                     $request = $client->request('GET', 'https://sagecloud.ng/api/v2/wallet/balance', $headers);
                     $res = $request->getBody()->getContents();
-                    $resArray = json_decode($res,true);
-                    
+                    $resArray = json_decode($res, true);
+
+
+                    // register wallet
                     // $wallet = wallet::create([
                     //     'user_id' => $user->id,
                     //     'account_name' => $responseDataArray['data']['account_details']['account_name'],
                     //     'account_email' => $responseDataArray['data']['account_details']['account_email'],
                     //     'account_number' => $responseDataArray['data']['account_details']['account_number'],
                     //     'currency' => 'NGN',
-                    //     'bank_name' => $responseDataArray['data']['account_details'] ['bank_name'],
-                    //     // 'balance' => $resArray['general_wallet']['balance'],
+                    //     'bank_name' => $responseDataArray['data']['account_details']['bank_name'],
+                    //     'balance' => $resArray['general_wallet']['balance'],
                     //     'account_reference' => $responseDataArray['data']['account_details']['account_reference'],
-                    //     // 'status' => $resArray['general_wallet']['status'],
+                    //     'status' => $resArray['general_wallet']['status'],
                     // ]);
-    
+
+                    $wallet = wallet::create([
+                        'user_id' => $user->id,
+                        'wallet_id' => rand(),
+                        'transaction_id' => rand(),
+                        'account_name' => $responseDataArray['data']['account_details']['account_name'],
+                        'account_email' => $responseDataArray['data']['account_details']['account_email'],
+                        'account_number' => $responseDataArray['data']['account_details']['account_number'],
+                        'currency' => 'NGN',
+                        'bank_name' => $responseDataArray['data']['account_details']['bank_name'],
+                        'balance' => '0.00',
+                        'account_reference' => $responseDataArray['data']['account_details']['account_reference'],
+                        'status' => 'ACTIVE',
+                    ]);
+
+
                     return response()->json([
                         'status' => $statusCode,
                         'data' => $responseData,
                         'data2' => $responseDataArray,
                         'res' => $resArray
                     ]);
-
                 } catch (\GuzzleHttp\Exception\RequestException $e) {
                     if ($e->hasResponse()) {
                         $response = $e->getResponse();
@@ -146,7 +172,7 @@ class UserController extends Controller
                         $statusCode = $e->getCode();
                         $errorMessage = $e->getMessage();
                     }
-        
+
                     return response()->json([
                         'error' => $errorMessage,
                         'status' => $statusCode
@@ -154,7 +180,7 @@ class UserController extends Controller
                 }
 
 
-            
+
 
                 // return response()->json(['token' => $token, 'user' => $user, 'message' => 'OTP sent successfully']);
 
@@ -210,11 +236,51 @@ class UserController extends Controller
                 // Send email to user containing the OTP
                 Mail::to($user->email)->send(new OtpVerificationMail($user->otp));
 
-
-
-                // return response()->json(['token' => $token, 'user' => $user, 'message' => 'OTP sent successfully']);
+                return response()->json([
+                    'token' => $token,
+                     'user' => $user,
+                      'message' => 'OTP sent successfully',
+                    ], 401);
+                
+                
+                    $client = new Client();
+                    $headers = [
+                        'Accept' => 'application/json',
+                        'Content-Type' => 'application/json'
+                    ];
+                      // Data to be sent in the request body
+                      $body = [
+                          'email' => "hello@useurbanpay.com",
+                        'password' => "@Urbanpay247!",
+                        // Add more key-value pairs as needed
+                        ];
+                    
+                    $request = $client->request('POST', 'https://sagecloud.ng/api/v2/merchant/authorization', [
+                        'headers' => $headers,
+                        'json' => $body
+                    ]);
+                    $res = $request->getBody()->getContents();
+                    $resArray = json_decode($res, true);
+        
+        
+                      // api balance request
+                      $headers = [
+                        'Content-Type' => 'application/json',
+                        'Authorization' => $resArray['data']['token']['access_token'],
+                        'Accept' => 'application/json'
+                    ];
+                    $request1 = $client->request('GET', 'https://sagecloud.ng/api/v2/wallet/balance', $headers);
+                    $ress = $request1->getBody()->getContents();
+                    // $resArray = json_decode($ress, true);
+        
+        
+                    return response()->json([
+                   
+                           'auth' => $res,
+                           'getapi' => $ress
+                        ]);
+          
             }
-            // return response()->json(['message' => 'Unauthorized'], 401);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
