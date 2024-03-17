@@ -255,11 +255,11 @@ class UserController extends Controller
                         // Add more key-value pairs as needed
                         ];
                     
-                    $request = $client->request('POST', 'https://sagecloud.ng/api/v2/merchant/authorization', [
+                    $reques = $client->request('POST', 'https://sagecloud.ng/api/v2/merchant/authorization', [
                         'headers' => $headers,
                         'json' => $body
                     ]);
-                    $res = $request->getBody()->getContents();
+                    $res = $reques->getBody()->getContents();
                     $resArray = json_decode($res, true);
         
         
@@ -268,18 +268,22 @@ class UserController extends Controller
                         'Content-Type' => 'application/json',
                         'Authorization' => $resArray['data']['token']['access_token'],
                         'Accept' => 'application/json'
-                    ];
+                        ];
+
+
                     $request1 = $client->request('GET', 'https://sagecloud.ng/api/v2/wallet/balance', $headers);
                     $ress = $request1->getBody()->getContents();
-                    // $resArray = json_decode($ress, true);
+                    $ressArray = json_decode($ress, true);
+
+                    $request->session()->put('balance', $ressArray['general_wallet']['balance']);
+
         
         
                     return response()->json([
                    
-                           'auth' => $res,
-                           'getapi' => $ress
-                        ]);
-          
+                        'auth' => $res,
+                        'getapi' => $ress
+                    ]);
             }
         } catch (\Throwable $th) {
             return response()->json([
@@ -288,6 +292,7 @@ class UserController extends Controller
             ], 500);
         }
     }
+
 
     public function pin(Request $request)
     {
