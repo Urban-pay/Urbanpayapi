@@ -31,3 +31,4 @@ Route::post('/auth/updateUserProfilePinVerify/', [UserController::class, 'update
 Route::post('/auth/updateUserProfilePasswordVerify/', [UserController::class, 'updateUserProfilePasswordVerify']);
 Route::put('/auth/updateUserProfilePin/', [UserController::class, 'updateUserProfilePin']);
 Route::put('/auth/updateUserProfilePassword/', [UserController::class, 'updateUserProfilePassword']);
+Route::get('/auth/getbankList/', [UserController::class, 'getbankList']);

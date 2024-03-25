@@ -7,6 +7,8 @@ use App\Models\user;
 use App\Models\deleteduser;
 use App\Models\otp;
 use App\Models\wallet;
+use App\Models\transaction;
+use App\Models\beneficiary;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -220,6 +222,13 @@ class UserController extends Controller
                 $request->session()->put('username', $user->username);
                 $token = $user->createToken('AuthToken')->plainTextToken;
 
+                // saving wallet details to session
+                $wallet = wallet::where('user_id', $user->id)->first();
+                $request->session()->put('user_id', $wallet->user_id);
+                $request->session()->put('wallet_id', $wallet->wallet_id);
+                $request->session()->put('transaction_id', $wallet->transaction_id);
+
+
                 $user = User::where('email', $user->email)->first();
 
                 if (!$user) {
@@ -238,52 +247,53 @@ class UserController extends Controller
 
                 return response()->json([
                     'token' => $token,
-                     'user' => $user,
-                      'message' => 'OTP sent successfully',
-                    ], 401);
-                
-                
-                    $client = new Client();
-                    $headers = [
-                        'Accept' => 'application/json',
-                        'Content-Type' => 'application/json'
-                    ];
-                      // Data to be sent in the request body
-                      $body = [
-                          'email' => "hello@useurbanpay.com",
-                        'password' => "@Urbanpay247!",
-                        // Add more key-value pairs as needed
-                        ];
-                    
-                    $reques = $client->request('POST', 'https://sagecloud.ng/api/v2/merchant/authorization', [
-                        'headers' => $headers,
-                        'json' => $body
-                    ]);
-                    $res = $reques->getBody()->getContents();
-                    $resArray = json_decode($res, true);
-        
-        
-                      // api balance request
-                      $headers = [
-                        'Content-Type' => 'application/json',
-                        'Authorization' => $resArray['data']['token']['access_token'],
-                        'Accept' => 'application/json'
-                        ];
+                    'user' => $user,
+                    'message' => 'OTP sent successfully',
+                ], 401);
 
 
-                    $request1 = $client->request('GET', 'https://sagecloud.ng/api/v2/wallet/balance', $headers);
-                    $ress = $request1->getBody()->getContents();
-                    $ressArray = json_decode($ress, true);
+                $client = new Client();
+                $headers = [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json'
+                ];
+                // Data to be sent in the request body
+                $body = [
+                    'email' => "hello@useurbanpay.com",
+                    'password' => "@Urbanpay247!",
+                    // Add more key-value pairs as needed
+                ];
 
-                    $request->session()->put('balance', $ressArray['general_wallet']['balance']);
+                $reques = $client->request('POST', 'https://sagecloud.ng/api/v2/merchant/authorization', [
+                    'headers' => $headers,
+                    'json' => $body
+                ]);
+                $res = $reques->getBody()->getContents();
+                $resArray = json_decode($res, true);
 
-        
-        
-                    return response()->json([
-                   
-                        'auth' => $res,
-                        'getapi' => $ress
-                    ]);
+
+                // api balance request
+                $headers = [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => $resArray['data']['token']['access_token'],
+                    'Accept' => 'application/json'
+                ];
+
+
+                $request1 = $client->request('GET', 'https://sagecloud.ng/api/v2/wallet/balance', $headers);
+                $ress = $request1->getBody()->getContents();
+                $ressArray = json_decode($ress, true);
+
+                $request->session()->put('balance', $ressArray['general_wallet']['balance']);
+                $request->session()->put('bearer', $resArray['data']['token']['access_token']);
+
+
+
+                return response()->json([
+
+                    'auth' => $res,
+                    'getapi' => $ress
+                ]);
             }
         } catch (\Throwable $th) {
             return response()->json([
@@ -585,6 +595,142 @@ class UserController extends Controller
         } else {
             // OTP is invalid
             return response()->json(['message' => 'Invalid OTP'], 401);
+        }
+    }
+
+    public function getbankList(Request $request)
+    {
+
+        try {
+
+            // authorization
+            $client = new Client();
+            $headers = [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json'
+            ];
+            // Data to be sent in the request body
+            $body = [
+                'email' => "hello@useurbanpay.com",
+                'password' => "@Urbanpay247!",
+                // Add more key-value pairs as needed
+            ];
+
+            $reques = $client->request('POST', 'https://sagecloud.ng/api/v2/merchant/authorization', [
+                'headers' => $headers,
+                'json' => $body
+            ]);
+            $res = $reques->getBody()->getContents();
+            $resArray = json_decode($res, true);
+
+            // get list of bank
+            $headers1 = [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'Authorization' => $resArray['data']['token']['access_token']
+            ];
+            $request1 = $client->request('GET', 'https://sagecloud.ng/api/v2/transfer/get-transfer-data', 
+                $headers1
+            );
+            $ress1 = $request1->getBody()->getContents();
+            $ressArray1 = json_decode($ress1, true);
+
+
+
+
+
+            return response()->json([
+
+                'data' => $res,
+                'msg' => $ress1
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+    public function sendMoney(Request $request)
+    {
+
+        try {
+
+            $request->validate([
+                'reference' => 'required|string',
+                'bank_code' => 'required|string',
+                'bank_name' => 'required|string',
+                'account_number' => 'required|string',
+                'account_name' => 'required|string',
+                'amount' => 'required|string',
+                'urbanPayTag' => 'nullable|string',
+                'narration' => 'required|string',
+            ]);
+            // verify bank account
+            try {
+
+                $client = new Client();
+                $headers = [
+                  'Accept' => 'application/json',
+                  'Content-Type' => 'application/json',
+                  'Authorization' => $request->session()->put('bearer')
+                ];
+                $body = '{
+                  "bank_code": "'.$request->bank_code.'",
+                  "account_number": ""'.$request->account_number.'"
+                }';
+                $request = $client->request('POST', 'https://sagecloud.ng/api/v2/transfer/verify-bank-account', [
+                   'headers'=>  $headers,
+                   'json' => $body
+                ]);
+                $ress = $request->getBody()->getContents();
+                $ressArray = json_decode($ress, true);
+                return response()->json([
+                    'message' => $request->getBody()
+                ], 500);
+
+
+                // $transaction = transaction::create([
+                //     'user_id' => $request->session()->get('user_id'),
+                //     'wallet_id' => $request->session()->get('wallet_id'),
+                //     'transaction_id' => $request->session()->get('transaction_id'),
+                //     'reference' => $request->reference,
+                //     'bank_code' => $request->bank_code,
+                //     'bank_name' => $request->bank_name,
+                //     'account_number' => $request->account_number,
+                //     'account_name' => $request->account_name,
+                //     'amount' => $request->amount,
+                //     'urbanPayTag' => $request->urbanPayTag,
+                //     'narration' => $request->narration,
+                //     'status' => 'success',
+                // ]);
+    
+                // $beneficiary = beneficiary::create([
+                //     'user_id' => $request->session()->get('user_id'),
+                //     'wallet_id' => $request->session()->get('wallet_id'),
+                //     'transaction_id' => $request->session()->get('transaction_id'),
+                //     'reference' => $request->reference,
+                //     'bank_code' => $request->bank_code,
+                //     'bank_name' => $request->bank_name,
+                //     'account_number' => $request->account_number,
+                //     'account_name' => $request->account_name,
+                //     'urbanPayTag' => $request->urbanPayTag,
+                // ]);
+            } catch (\Throwable $e) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+            
+          
+
+          
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
         }
     }
 }
