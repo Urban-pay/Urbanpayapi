@@ -21,7 +21,8 @@ use App\Mail\pinVerification;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
-
+// use JWTAuth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 // use DB;
 
 
@@ -64,7 +65,9 @@ class UserController extends Controller
                 $request->session()->put('username', $user->username);
 
                 // generate token
-                $token = $user->createToken('AuthToken')->plainTextToken;
+                $token = JWTAuth::fromUser($user);
+
+                // $token = $user->createToken('AuthToken')->plainTextToken;
 
 
 
@@ -123,7 +126,7 @@ class UserController extends Controller
                     // api balance request
                     $headers = [
                         'Content-Type' => 'application/json',
-                        'Authorization' => 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI1IiwianRpIjoiZGNkZjhjM2M2ZTNmOTY4MGY3ZjFhYzY0NGU2MGZiZjNlNTVkNzkzNjZhMjc2YmQzM2U2NWI1MTZiM2UxYjdlYzIwYjAwMzM4M2QzNzYxNjYiLCJpYXQiOjE3MTA2NzYxODQuMDQ4OCwibmJmIjoxNzEwNjc2MTg0LjA0ODgwNCwiZXhwIjoxNzEwNzYyNTg0LjAzNDIyMywic3ViIjoiNDMzIiwic2NvcGVzIjpbIioiXX0.Kz1gt-MJXtw9iMTS_D6shAqYOslcCVUs8jDUuQlNbVkbNCSFOnqBlf7CoQLTNVqvK2j3FJP6O-5u6458a2pknnRqHKrbSkQokwTzolaYj5lGvIqVSvel16yYSInPprR14QvU6Q50C3qtLyRyDg_sASUPeFZkaX7CSuJB9a2Secue3_ywbW3m2XuH2890wUc5mSf6pKMokRaDBnRGwBdTnhfgXwqAnUgdgm0ESTUj5Y8UJ-5Z_j8bC8Afpcd4T7SazjCF3rZ7tzhT_fumCFvrPditsCJbqxOKD0WErcSseSAX_Yh32EiZSwLNu1s45NkjaIyJol4C8oWrOjpEoRq5D7EYUXGS6dbbSNZSraTQrBkyDsUOddr3vtsABU3TLvpLrzU15ERtweQiGM5R0ssCWj9MaScQDgiy9KCa6A8IHUNRsq3aHMmnUrqFppkw37yCkpsXKfnYAmYRVGD1V7-r3mjSUQU8AdFumpFwFb9cJPknsXNkAdEvJig7N8FolXtD8sTPayH1fl_P69hVkM7WwXDtPMIuZgs0Z1xInTbsROzNxnkxGI5R1W2aBqOlm0R21cpQnLCA6M-MA2HiIYkYSSryIOPySVPyRAUZQlcfVl1yxAJFtDA-GbHy-LiV1pR-lbqLbFvSR4AAy6CjBTmNDmoZd6_uhaUrdHDMslWSHFE'
+                        'Authorization' => $responseDataArray['data']['token']['access_token']
                     ];
                     $request = $client->request('GET', 'https://sagecloud.ng/api/v2/wallet/balance', $headers);
                     $res = $request->getBody()->getContents();
@@ -162,7 +165,8 @@ class UserController extends Controller
                         'status' => $statusCode,
                         'data' => $responseData,
                         'data2' => $responseDataArray,
-                        'res' => $resArray
+                        'res' => $resArray,
+                        'token' => $token
                     ]);
                 } catch (\GuzzleHttp\Exception\RequestException $e) {
                     if ($e->hasResponse()) {
@@ -220,7 +224,9 @@ class UserController extends Controller
                 $request->session()->put('email', $user->email);
                 $request->session()->put('name', $user->name);
                 $request->session()->put('username', $user->username);
-                $token = $user->createToken('AuthToken')->plainTextToken;
+                $token = JWTAuth::fromUser($user);
+
+                // $token = $user->createToken('AuthToken')->plainTextToken;
 
                 // saving wallet details to session
                 $wallet = wallet::where('user_id', $user->id)->first();
@@ -245,14 +251,8 @@ class UserController extends Controller
                 // Send email to user containing the OTP
                 Mail::to($user->email)->send(new OtpVerificationMail($user->otp));
 
-                return response()->json([
-                    'token' => $token,
-                    'user' => $user,
-                    'message' => 'OTP sent successfully',
-                ], 401);
-
-
                 $client = new Client();
+           
                 $headers = [
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json'
@@ -288,12 +288,13 @@ class UserController extends Controller
                 $request->session()->put('bearer', $resArray['data']['token']['access_token']);
 
 
-
                 return response()->json([
-
+                    'token' => $token,
+                    'user' => $user,
+                    'message' => 'OTP sent successfully',
                     'auth' => $res,
                     'getapi' => $ress
-                ]);
+                ], 401);
             }
         } catch (\Throwable $th) {
             return response()->json([
