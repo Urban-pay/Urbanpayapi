@@ -13,6 +13,7 @@ class wallet extends Model
         'wallet_id',
         'transaction_id',
         'account_name',
+        'urbanPayTag',
         'account_email',
         'account_number',
         'currency',

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('wallet_id');
             $table->string('transaction_id');
             $table->string('account_name');
+            $table->string('urbanPayTag');
             $table->string('account_email');
             $table->string('account_number');
             $table->string('currency');

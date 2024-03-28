@@ -23,8 +23,9 @@ use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
 // use JWTAuth;
 use Tymon\JWTAuth\Facades\JWTAuth;
-// use DB;
 
+// use DB;
+// jwt-auth secret [bvuvNuoICaIMhK24iN4K9Th9ASkI965MHLG845SO5kJ52wMh0bIARiXsrRt6Hnqt] set successfully.
 
 
 
@@ -92,24 +93,24 @@ class UserController extends Controller
 
 
 
-                $client = new Client();
-
-                // Define your headers
-                $headers = [
-                    'Content-Type' => 'application/json',
-                    'Authorization' => 'SCSec-L-8e2b1b217e4b451685f19bf9d0e0b077'
-                ];
-
-                // Data to be sent in the request body
-                $data = [
-                    'account_name' => $user->name,
-                    'email' => $user->email
-                    // Add more key-value pairs as needed
-                ];
-
+                
                 try {
-
-
+                    
+                    // api to generate acccount
+                    $client = new Client();
+    
+                    // Define your headers
+                    $headers = [
+                        'Content-Type' => 'application/json',
+                        'Authorization' => 'SCSec-L-8e2b1b217e4b451685f19bf9d0e0b077'
+                    ];
+    
+                    // Data to be sent in the request body
+                    $data = [
+                        'account_name' => $user->name,
+                        'email' => $user->email
+                        // Add more key-value pairs as needed
+                    ];
 
                     // Make the API request with headers and request body
                     $response = $client->request('POST', 'https://sagecloud.ng/api/v3/virtual-account/generate', [
@@ -123,39 +124,38 @@ class UserController extends Controller
 
 
 
+      
                     // api balance request
+                    $access_token = $responseDataArray['data']['token']['access_token'];
                     $headers = [
                         'Content-Type' => 'application/json',
-                        'Authorization' => $responseDataArray['data']['token']['access_token']
+                        'Accept' => 'application/json',
+                        'Authorization' => 'Bearer '.$access_token.'',
                     ];
-                    $request = $client->request('GET', 'https://sagecloud.ng/api/v2/wallet/balance', $headers);
-                    $res = $request->getBody()->getContents();
-                    $resArray = json_decode($res, true);
+
+                    $request1 = $client->request('GET', 'https://sagecloud.ng/api/v2/wallet/balance', [
+                    'headers' => $headers
+                    ]);
+                    $ress = $request1->getBody()->getContents();
+                    $ressArray = json_decode($ress, true);
+
+                    $request->session()->put('balance', $ressArray['general_wallet']['balance']);
+                    $request->session()->put('bearer', $access_token);
 
 
-                    // register wallet
-                    // $wallet = wallet::create([
-                    //     'user_id' => $user->id,
-                    //     'account_name' => $responseDataArray['data']['account_details']['account_name'],
-                    //     'account_email' => $responseDataArray['data']['account_details']['account_email'],
-                    //     'account_number' => $responseDataArray['data']['account_details']['account_number'],
-                    //     'currency' => 'NGN',
-                    //     'bank_name' => $responseDataArray['data']['account_details']['bank_name'],
-                    //     'balance' => $resArray['general_wallet']['balance'],
-                    //     'account_reference' => $responseDataArray['data']['account_details']['account_reference'],
-                    //     'status' => $resArray['general_wallet']['status'],
-                    // ]);
 
                     $wallet = wallet::create([
                         'user_id' => $user->id,
                         'wallet_id' => rand(),
                         'transaction_id' => rand(),
                         'account_name' => $responseDataArray['data']['account_details']['account_name'],
+                        'urbanPayTag' => $validatedData['username'],
                         'account_email' => $responseDataArray['data']['account_details']['account_email'],
                         'account_number' => $responseDataArray['data']['account_details']['account_number'],
                         'currency' => 'NGN',
                         'bank_name' => $responseDataArray['data']['account_details']['bank_name'],
-                        'balance' => '0.00',
+                        'balance' => $ressArray['general_wallet']['balance'],
+                        // 'balance' => '0.00',
                         'account_reference' => $responseDataArray['data']['account_details']['account_reference'],
                         'status' => 'ACTIVE',
                     ]);
@@ -165,7 +165,7 @@ class UserController extends Controller
                         'status' => $statusCode,
                         'data' => $responseData,
                         'data2' => $responseDataArray,
-                        'res' => $resArray,
+                        'res' => $ressArray,
                         'token' => $token
                     ]);
                 } catch (\GuzzleHttp\Exception\RequestException $e) {
@@ -224,18 +224,18 @@ class UserController extends Controller
                 $request->session()->put('email', $user->email);
                 $request->session()->put('name', $user->name);
                 $request->session()->put('username', $user->username);
-                $token = JWTAuth::fromUser($user);
-
+                
                 // $token = $user->createToken('AuthToken')->plainTextToken;
-
+                
                 // saving wallet details to session
                 $wallet = wallet::where('user_id', $user->id)->first();
                 $request->session()->put('user_id', $wallet->user_id);
                 $request->session()->put('wallet_id', $wallet->wallet_id);
                 $request->session()->put('transaction_id', $wallet->transaction_id);
-
-
+                
+                
                 $user = User::where('email', $user->email)->first();
+                // $token = JWTAuth::fromUser($user);
 
                 if (!$user) {
                     return response()->json(['message' => 'User not found'], 404);
@@ -270,17 +270,20 @@ class UserController extends Controller
                 ]);
                 $res = $reques->getBody()->getContents();
                 $resArray = json_decode($res, true);
+                $access_token = $resArray['data']['token']['access_token'];
 
 
                 // api balance request
                 $headers = [
                     'Content-Type' => 'application/json',
-                    'Authorization' => $resArray['data']['token']['access_token'],
-                    'Accept' => 'application/json'
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer '.$access_token.'',
                 ];
 
 
-                $request1 = $client->request('GET', 'https://sagecloud.ng/api/v2/wallet/balance', $headers);
+                $request1 = $client->request('GET', 'https://sagecloud.ng/api/v2/wallet/balance', [
+                   'headers' => $headers
+                ]);
                 $ress = $request1->getBody()->getContents();
                 $ressArray = json_decode($ress, true);
 
@@ -289,7 +292,8 @@ class UserController extends Controller
 
 
                 return response()->json([
-                    'token' => $token,
+                    // 'token' => $token,
+                    'token' =>  $ressArray['general_wallet']['balance'],
                     'user' => $user,
                     'message' => 'OTP sent successfully',
                     'auth' => $res,
@@ -604,45 +608,22 @@ class UserController extends Controller
 
         try {
 
-            // authorization
-            $client = new Client();
-            $headers = [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json'
-            ];
-            // Data to be sent in the request body
-            $body = [
-                'email' => "hello@useurbanpay.com",
-                'password' => "@Urbanpay247!",
-                // Add more key-value pairs as needed
-            ];
-
-            $reques = $client->request('POST', 'https://sagecloud.ng/api/v2/merchant/authorization', [
-                'headers' => $headers,
-                'json' => $body
-            ]);
-            $res = $reques->getBody()->getContents();
-            $resArray = json_decode($res, true);
-
             // get list of bank
+            $client = new Client();
+            $access_token =$request->session()->get('bearer');
+
             $headers1 = [
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
-                'Authorization' => $resArray['data']['token']['access_token']
+                'Authorization' => 'Bearer '.$access_token.''
             ];
-            $request1 = $client->request('GET', 'https://sagecloud.ng/api/v2/transfer/get-transfer-data', 
-                $headers1
-            );
+            $request1 = $client->request('GET', 'https://sagecloud.ng/api/v2/transfer/get-transfer-data', [
+                'headers' => $headers1
+            ]);
             $ress1 = $request1->getBody()->getContents();
             $ressArray1 = json_decode($ress1, true);
 
-
-
-
-
             return response()->json([
-
-                'data' => $res,
                 'msg' => $ress1
             ]);
         } catch (\Throwable $th) {
@@ -658,75 +639,106 @@ class UserController extends Controller
         try {
 
             $request->validate([
-                'reference' => 'required|string',
+                'reference' => 'nullable|string',
                 'bank_code' => 'required|string',
                 'bank_name' => 'required|string',
                 'account_number' => 'required|string',
                 'account_name' => 'required|string',
                 'amount' => 'required|string',
-                'urbanPayTag' => 'nullable|string',
                 'narration' => 'required|string',
             ]);
-            // verify bank account
             try {
+                
 
+                // verify bank account
                 $client = new Client();
+                $access_token =$request->session()->get('bearer');
+
                 $headers = [
                   'Accept' => 'application/json',
                   'Content-Type' => 'application/json',
-                  'Authorization' => $request->session()->put('bearer')
+                  'Authorization' => 'Bearer '.$access_token.'',
                 ];
                 $body = '{
                   "bank_code": "'.$request->bank_code.'",
                   "account_number": ""'.$request->account_number.'"
                 }';
-                $request = $client->request('POST', 'https://sagecloud.ng/api/v2/transfer/verify-bank-account', [
+                $request1 = $client->request('POST', 'https://sagecloud.ng/api/v2/transfer/verify-bank-account', [
                    'headers'=>  $headers,
                    'json' => $body
                 ]);
-                $ress = $request->getBody()->getContents();
+                $ress = $request1->getBody()->getContents();
                 $ressArray = json_decode($ress, true);
+
+                
+                // send  money
+                $headers = [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer '.$access_token.''
+                ];
+                // $body = '{
+                //     "reference": "6A3EKXI5M6U7DAVL_tf1",
+                //     "bank_code": "'.$request->bank_code.'",
+                //     "account_number": "'.$request->account_number.'",
+                //     "account_name": "'.$request->account_name.'",
+                //     "amount": "'.$request->amount.'",
+                //     "narration": "'.$request->narration.'"
+                // }';
+                $body = '{
+                    "reference": "6A3EKXI5M6U7DAVL_tf1",
+                    "bank_code": "044",
+                    "account_number": "0058381844",
+                    "account_name": "Samson Okemakinde",
+                    "amount": "100",
+                    "narration": "Test Transfer"
+                }';
+                $request2 = $client->request('POST', 'https://sagecloud.ng/api/v2/transfer/fund-transfer', [
+                    'headers' => $headers, 
+                    'json' => $body
+                ]);
+                $response= $request2->getBody()->getContents();
+
+              
+
+
+                $transaction = transaction::create([
+                    'user_id' => $request->session()->get('user_id'),
+                    'wallet_id' => $request->session()->get('wallet_id'),
+                    'transaction_id' => $request->session()->get('transaction_id'),
+                    'reference' => $request->reference,
+                    'bank_code' => $request->bank_code,
+                    'bank_name' => $request->bank_name,
+                    'account_number' => $request->account_number,
+                    'account_name' => $request->account_name,
+                    'amount' => $request->amount,
+                    'urbanPayTag' => $request->urbanPayTag,
+                    'narration' => $request->narration,
+                    'status' => 'success',
+                ]);
+    
+                $beneficiary = beneficiary::create([
+                    'user_id' => $request->session()->get('user_id'),
+                    'wallet_id' => $request->session()->get('wallet_id'),
+                    'transaction_id' => $request->session()->get('transaction_id'),
+                    'reference' => $request->reference,
+                    'bank_code' => $request->bank_code,
+                    'bank_name' => $request->bank_name,
+                    'account_number' => $request->account_number,
+                    'account_name' => $request->account_name,
+                    'urbanPayTag' => $request->urbanPayTag,
+                ]);
                 return response()->json([
-                    'message' => $request->getBody()
+                    'message' => $ress,
+                    'msg' => $response,
                 ], 500);
 
-
-                // $transaction = transaction::create([
-                //     'user_id' => $request->session()->get('user_id'),
-                //     'wallet_id' => $request->session()->get('wallet_id'),
-                //     'transaction_id' => $request->session()->get('transaction_id'),
-                //     'reference' => $request->reference,
-                //     'bank_code' => $request->bank_code,
-                //     'bank_name' => $request->bank_name,
-                //     'account_number' => $request->account_number,
-                //     'account_name' => $request->account_name,
-                //     'amount' => $request->amount,
-                //     'urbanPayTag' => $request->urbanPayTag,
-                //     'narration' => $request->narration,
-                //     'status' => 'success',
-                // ]);
-    
-                // $beneficiary = beneficiary::create([
-                //     'user_id' => $request->session()->get('user_id'),
-                //     'wallet_id' => $request->session()->get('wallet_id'),
-                //     'transaction_id' => $request->session()->get('transaction_id'),
-                //     'reference' => $request->reference,
-                //     'bank_code' => $request->bank_code,
-                //     'bank_name' => $request->bank_name,
-                //     'account_number' => $request->account_number,
-                //     'account_name' => $request->account_name,
-                //     'urbanPayTag' => $request->urbanPayTag,
-                // ]);
             } catch (\Throwable $e) {
                 return response()->json([
                     'status' => false,
                     'message' => $e->getMessage()
                 ], 500);
             }
-            
-          
-
-          
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -734,4 +746,144 @@ class UserController extends Controller
             ], 500);
         }
     }
+    public function sendMoneyWithTag(Request $request)
+    {
+
+        try {
+
+            $request->validate([
+                // 'reference' => 'required|string',
+                'bank_code' => 'required|string',
+                'amount' => 'required|string',
+                'urbanPayTag' => 'nullable|string',
+                'narration' => 'required|string',
+            ]);
+            try {
+
+                // get acount details
+                $wallets = DB::table('wallets')
+                ->where('urbanPayTag', '=', $request->urbanPayTag)
+                ->get();
+
+
+                // verify bank account
+                $client = new Client();
+                $access_token =$request->session()->get('bearer');
+
+                $headers = [
+                  'Accept' => 'application/json',
+                  'Content-Type' => 'application/json',
+                  'Authorization' => 'Bearer '.$access_token.'',
+                ];
+                $body = '{
+                  "bank_code": "'.$request->bank_code.'",
+                  "account_number": ""'.$wallets['account_number'].'"
+                }';
+                $request1 = $client->request('POST', 'https://sagecloud.ng/api/v2/transfer/verify-bank-account', [
+                   'headers'=>  $headers,
+                   'json' => $body
+                ]);
+                $ress = $request1->getBody()->getContents();
+                $ressArray = json_decode($ress, true);
+
+                
+                // send  money
+                $headers = [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer '.$access_token.''
+                ];
+                $body = '{
+                    "reference": "'.$wallets['reference'].'",
+                    "bank_code": "'.$request->bank_code.'",
+                    "account_number": "'.$wallets['account_number'].'",
+                    "account_name": "'.$wallets['account_name'].'",
+                    "amount": "'.$request->amount.'",
+                    "narration": "'.$request->narration.'"
+                }';
+                // $body = '{
+                //     "reference": "6A3EKXI5M6U7DAVL_tf1",
+                //     "bank_code": "044",
+                //     "account_number": "0058381844",
+                //     "account_name": "Samson Okemakinde",
+                //     "amount": "100",
+                //     "narration": "Test Transfer"
+                // }';
+                $request2 = $client->request('POST', 'https://sagecloud.ng/api/v2/transfer/fund-transfer', [
+                    'headers' => $headers, 
+                    'json' => $body
+                ]);
+                $response= $request2->getBody()->getContents();
+
+              
+
+
+                $transaction = transaction::create([
+                    'user_id' => $request->session()->get('user_id'),
+                    'wallet_id' => $request->session()->get('wallet_id'),
+                    'transaction_id' => $request->session()->get('transaction_id'),
+                    'reference' =>$wallets['reference'],
+                    'bank_code' => $request->bank_code,
+                    'bank_name' => $wallets['bank_name'],
+                    'account_number' => $wallets['account_number'],
+                    'account_name' => $wallets['account_name'],
+                    'amount' => $request->amount,
+                    'urbanPayTag' => $request->urbanPayTag,
+                    'narration' => $request->narration,
+                    'status' => 'success',
+                ]);
+    
+                $beneficiary = beneficiary::create([
+                    'user_id' => $request->session()->get('user_id'),
+                    'wallet_id' => $request->session()->get('wallet_id'),
+                    'transaction_id' => $request->session()->get('transaction_id'),
+                    'reference' =>$wallets['reference'],
+                    'bank_code' => $request->bank_code,
+                    'bank_name' => $wallets['bank_name'],
+                    'account_number' => $wallets['account_number'],
+                    'account_name' => $wallets['account_name'],
+                    'urbanPayTag' => $request->urbanPayTag,
+                ]);
+                return response()->json([
+                    'message' => $ress,
+                    'msg' => $response,
+                    'wallets' => $wallets,
+                ], 500);
+
+            } catch (\Throwable $e) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+    public function addMoney(Request $request)
+    {
+        try {
+            # code...
+            $user_id = $request->session()->get('user_id');
+            $wallet_id = $request->session()->get('wallet_id');
+            // $wallets = wallet::where('user_id', $user_id)->first();
+            $wallets = DB::table('wallets')
+                ->where('user_id', '=', $user_id)
+                ->where('wallet_id', '=', $wallet_id)
+                ->get();
+
+                return response()->json([
+                    'data' => $wallets
+                ], 200);
+        } catch (\Throwable $e) {
+            # code...
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
+

@@ -32,3 +32,6 @@ Route::post('/auth/updateUserProfilePasswordVerify/', [UserController::class, 'u
 Route::put('/auth/updateUserProfilePin/', [UserController::class, 'updateUserProfilePin']);
 Route::put('/auth/updateUserProfilePassword/', [UserController::class, 'updateUserProfilePassword']);
 Route::get('/auth/getbankList/', [UserController::class, 'getbankList']);
+Route::post('/auth/sendMoney/', [UserController::class, 'sendMoney']);
+Route::post('/auth/sendMoneyWithTag/', [UserController::class, 'sendMoneyWithTag']);
+Route::post('/auth/addMoney/', [UserController::class, 'addMoney']);
