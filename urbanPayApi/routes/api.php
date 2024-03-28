@@ -35,3 +35,4 @@ Route::get('/auth/getbankList/', [UserController::class, 'getbankList']);
 Route::post('/auth/sendMoney/', [UserController::class, 'sendMoney']);
 Route::post('/auth/sendMoneyWithTag/', [UserController::class, 'sendMoneyWithTag']);
 Route::post('/auth/addMoney/', [UserController::class, 'addMoney']);
+Route::post('/auth/transactionGet/', [UserController::class, 'transactionGet']);

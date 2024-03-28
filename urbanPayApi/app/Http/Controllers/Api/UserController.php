@@ -885,5 +885,29 @@ class UserController extends Controller
             ], 500);
         }
     }
+    public function transactionGet(Request $request)
+    {
+        try {
+            # code...
+            $user_id = $request->session()->get('user_id');
+            $wallet_id = $request->session()->get('wallet_id');
+            // $wallets = wallet::where('user_id', $user_id)->first();
+            $transactions = DB::table('transactions')
+                ->where('user_id', '=', $user_id)
+                ->where('wallet_id', '=', $wallet_id)
+                ->get();
+
+                return response()->json([
+                    'data' => $transactions
+                ], 200);
+        } catch (\Throwable $e) {
+            # code...
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    
 }
 
