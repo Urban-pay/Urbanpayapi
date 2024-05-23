@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('account_number');
             $table->string('currency');
             $table->string('bank_name');
+            $table->string('bank_code');
             $table->string('balance');
             $table->string('account_reference');
             $table->string('status')->nullable();

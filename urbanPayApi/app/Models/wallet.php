@@ -18,6 +18,7 @@ class wallet extends Model
         'account_number',
         'currency',
         'bank_name',
+        'bank_code',
         'balance',
         'account_reference',
         'status',

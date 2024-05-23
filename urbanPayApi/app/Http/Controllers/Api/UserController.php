@@ -47,16 +47,67 @@ class UserController extends Controller
                 'phoneno' => 'nullable|max:255',
                 'password' => 'nullable',
                 'pin' => 'nullable|string',
+                'firstName' => 'required',
+                'lastName'   => 'required',
+                'middleName' => 'nullable',
+                'phoneNumber' => 'required',
+                'addressLine_1'   => 'required',
+                'addressLine_2' => 'nullable',
+                'country' => 'required',
+                'city' => 'required',
+                'postalCode' => 'required',
+                'state' => 'required',
+                // 'isSoleProprietor' => 'required',
+                'description' => 'nullable',
+                'doingBusinessAs' => 'required' ,
+                'gender' => 'required',
+                'dateOfBirth'   => 'required',
+                'selfieImage' => 'required',
+                'bvn' => 'required',
+                'idType' => 'required',
+                'idNumber' => 'required',
+                'expiryDate' => 'required' 
             ]);
 
             if (strlen($request->pin) == 5) {
+                $string =$validatedData['name'];
+                $words = explode(' ', $string); // Split the string into an array of words
+                $firstname = $words[0]; // First word
+                $lastname = $words[1]; // Second word
+
+                    // Generate random OTP
+                    $otp = mt_rand(100000, 999999);
+
                 $user = User::create([
+                    'user_id' => mt_rand(1, 9999999),
                     'name' => $validatedData['name'],
                     'email' => $validatedData['email'],
                     'username' => $validatedData['username'],
                     'phoneno' => $validatedData['phoneno'],
                     'password' => Hash::make($validatedData['password']),
                     'pin' => Hash::make($validatedData['pin']),
+                    'otp' => $otp,
+                    'firstName' => $firstname,
+                    'lastName'   => $lastname,
+                    'middleName' => $validatedData['middleName'],
+                    'phoneNumber' => $validatedData['phoneNumber'],
+                    'addressLine_1'   => $validatedData['addressLine_1'],
+                    'addressLine_2' => $validatedData['addressLine_2'],
+                    'country' => $validatedData['country'],
+                    'city' => $validatedData['city'],
+                    'postalCode' => $validatedData['postalCode'],
+                    'state' => $validatedData['state'],
+                    'isSoleProprietor' => true,
+                    // 'isSoleProprietor' => $validatedData['isSoleProprietor'],
+                    'description' => $validatedData['description'],
+                    'doingBusinessAs' => $validatedData['doingBusinessAs'], 
+                    'gender' => $validatedData['gender'],
+                    'dateOfBirth'   => $validatedData['dateOfBirth'],
+                    'selfieImage' => $validatedData['selfieImage'],
+                    'bvn' => $validatedData['bvn'],
+                    'idType' => $validatedData['idType'],
+                    'idNumber' => $validatedData['idNumber'],
+                    'expiryDate' => $validatedData['expiryDate'],  
                 ]);
 
                 // save to session
@@ -69,8 +120,6 @@ class UserController extends Controller
                 
                 $token = $user->createToken('AuthToken')->plainTextToken;
                 
-                
-                
                 // email otp
                 $user = User::where('email', $user->email)->first();
 
@@ -79,11 +128,10 @@ class UserController extends Controller
                     return response()->json(['message' => 'User not found'], 404);
                 }
                 
-                // Generate random OTP
-                $otp = mt_rand(100000, 999999);
+            
                 
                 // Store OTP in the database with the user's email
-                $user->otp = $otp;
+                // $user->otp = $otp;
                 $user->save();
                 $user->delete();
 
@@ -107,32 +155,66 @@ class UserController extends Controller
                         'content-type' => 'application/json',
                         'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
                     ])->post('https://api.sandbox.getanchor.co/api/v1/customers', [
+                        'data' => [
+                            'type' => 'IndividualCustomer',
+                            'attributes' => [
+                                'fullName' => [
+                                    'firstName' => $firstname,
+                                    'lastName' => $lastname,
+                                    'middleName' => $user->middleName,
+                                ],
+                                'email' => $user->email,
+                                'phoneNumber' => $user->phoneno,
+                                'address' => [
+                                    'addressLine_1' => $user->addressLine_1,
+                                    'addressLine_2' => $user->addressLine_2,
+                                    'country' => $user->country,
+                                    'city' => $user->city,
+                                    'postalCode' => $user->postalCode,
+                                    'state' => $user->state,
+                                ],
+                                'isSoleProprietor' => $user->isSoleProprietor,
+                                'description' =>  $user->description,
+                                'doingBusinessAs' => ' ' . $firstname .' ' . $lastname .' INC',
+                                'identificationLevel2' => [
+                                    'gender' => $user->gender,
+                                    'dateOfBirth' => $user->dateOfBirth,
+                                    'selfieImage' => $user->selfieImage,
+                                    'bvn' => $user->selfieImage,
+                                ],
+                                'identificationLevel3' => [
+                                    'idType' => $user->idType,
+                                    'idNumber' => $user->idNumber,
+                                    'expiryDate' => $user->expiryDate,
+                                ],
+                            ],
+                        ],
                         // 'data' => [
                         //     'type' => 'IndividualCustomer',
                         //     'attributes' => [
                         //         'fullName' => [
-                        //             'firstName' => $firstname,
-                        //             'lastName' => $lastname,
-                        //             'middleName' => '',
+                        //             'firstName' => 'OMOTAYO',
+                        //             'lastName' => 'BRAHM-OLORUNOJE',
+                        //             'middleName' => 'IBRAHIM',
                         //         ],
-                        //         'email' => $user->email,
-                        //         'phoneNumber' => $user->phoneno,
+                        //         'email' => 'example@example.com',
+                        //         'phoneNumber' => '07012345678',
                         //         'address' => [
                         //             'addressLine_1' => '36 Araromi Street',
                         //             'addressLine_2' => 'Onike',
                         //             'country' => 'NG',
-                        //             'city' => 'Yaba',
+                        //             'city' => 'Lagos',
                         //             'postalCode' => 'NA',
                         //             'state' => 'Lagos',
                         //         ],
                         //         'isSoleProprietor' => true,
                         //         'description' => 'string',
-                        //         'doingBusinessAs' => ' ' . $firstname .' ' . $lastname .' INC',
+                        //         'doingBusinessAs' => 'JOHN DOE INC',
                         //         'identificationLevel2' => [
                         //             'gender' => 'Male',
                         //             'dateOfBirth' => '1994-06-25',
-                        //             'selfieImage' => null,
-                        //             'bvn' => '22262222226',
+                        //             'selfieImage' => 'bxxvxvxbvasbbxvxvx=',
+                        //             'bvn' => '22222222226',
                         //         ],
                         //         'identificationLevel3' => [
                         //             'idType' => 'DRIVERS_LICENSE',
@@ -141,42 +223,9 @@ class UserController extends Controller
                         //         ],
                         //     ],
                         // ],
-                        'data' => [
-                            'type' => 'IndividualCustomer',
-                            'attributes' => [
-                                'fullName' => [
-                                    'firstName' => 'OMOTAYO',
-                                    'lastName' => 'BRAHM-OLORUNOJE',
-                                    'middleName' => 'IBRAHIM',
-                                ],
-                                'email' => 'example@example.com',
-                                'phoneNumber' => '07012345678',
-                                'address' => [
-                                    'addressLine_1' => '36 Araromi Street',
-                                    'addressLine_2' => 'Onike',
-                                    'country' => 'NG',
-                                    'city' => 'Yaba',
-                                    'postalCode' => 'NA',
-                                    'state' => 'Lagos',
-                                ],
-                                'isSoleProprietor' => true,
-                                'description' => 'string',
-                                'doingBusinessAs' => 'JOHN DOE INC',
-                                'identificationLevel2' => [
-                                    'gender' => 'Male',
-                                    'dateOfBirth' => '1994-06-25',
-                                    'selfieImage' => 'bxxvxvxbvasbbxvxvx=',
-                                    'bvn' => '22222222226',
-                                ],
-                                'identificationLevel3' => [
-                                    'idType' => 'DRIVERS_LICENSE',
-                                    'idNumber' => 'DL123456789',
-                                    'expiryDate' => '2023-06-25',
-                                ],
-                            ],
-                        ],
                     ]);
                     $responseData = $response->json(); // Return JSON response from the API
+
 
                     // verify kyc
                     $url = "https://api.sandbox.getanchor.co/api/v1/customers/".$responseData['data']['id']."/verification/individual";
