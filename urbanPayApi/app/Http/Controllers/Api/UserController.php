@@ -59,24 +59,24 @@ class UserController extends Controller
                 'state' => 'required',
                 // 'isSoleProprietor' => 'required',
                 'description' => 'nullable',
-                'doingBusinessAs' => 'required' ,
+                'doingBusinessAs' => 'required',
                 'gender' => 'required',
                 'dateOfBirth'   => 'required',
                 'selfieImage' => 'required',
                 'bvn' => 'required',
                 'idType' => 'required',
                 'idNumber' => 'required',
-                'expiryDate' => 'required' 
+                'expiryDate' => 'required'
             ]);
 
             if (strlen($request->pin) == 5) {
-                $string =$validatedData['name'];
+                $string = $validatedData['name'];
                 $words = explode(' ', $string); // Split the string into an array of words
                 $firstname = $words[0]; // First word
                 $lastname = $words[1]; // Second word
 
-                    // Generate random OTP
-                    $otp = mt_rand(100000, 999999);
+                // Generate random OTP
+                $otp = mt_rand(100000, 999999);
 
                 $user = User::create([
                     'user_id' => mt_rand(1, 9999999),
@@ -100,26 +100,26 @@ class UserController extends Controller
                     'isSoleProprietor' => true,
                     // 'isSoleProprietor' => $validatedData['isSoleProprietor'],
                     'description' => $validatedData['description'],
-                    'doingBusinessAs' => $validatedData['doingBusinessAs'], 
+                    'doingBusinessAs' => $validatedData['doingBusinessAs'],
                     'gender' => $validatedData['gender'],
                     'dateOfBirth'   => $validatedData['dateOfBirth'],
                     'selfieImage' => $validatedData['selfieImage'],
                     'bvn' => $validatedData['bvn'],
                     'idType' => $validatedData['idType'],
                     'idNumber' => $validatedData['idNumber'],
-                    'expiryDate' => $validatedData['expiryDate'],  
+                    'expiryDate' => $validatedData['expiryDate'],
                 ]);
 
                 // save to session
                 $request->session()->put('email', $user->email);
                 $request->session()->put('name', $user->name);
                 $request->session()->put('username', $user->username);
-                
+
                 // generate token
                 // $token = JWTAuth::fromUser($user);
-                
+
                 $token = $user->createToken('AuthToken')->plainTextToken;
-                
+
                 // email otp
                 $user = User::where('email', $user->email)->first();
 
@@ -127,9 +127,9 @@ class UserController extends Controller
                 if (!$user) {
                     return response()->json(['message' => 'User not found'], 404);
                 }
-                
-            
-                
+
+
+
                 // Store OTP in the database with the user's email
                 // $user->otp = $otp;
                 $user->save();
@@ -150,6 +150,9 @@ class UserController extends Controller
                     $firstname = $words[0]; // First word
                     $lastname = $words[1]; // Second word
 
+
+
+
                     $response = Http::withHeaders([
                         'accept' => 'application/json',
                         'content-type' => 'application/json',
@@ -159,33 +162,33 @@ class UserController extends Controller
                             'type' => 'IndividualCustomer',
                             'attributes' => [
                                 'fullName' => [
-                                    'firstName' => $firstname,
-                                    'lastName' => $lastname,
-                                    'middleName' => $user->middleName,
+                                    'firstName' => 'OMOTAYO',
+                                    'lastName' => 'BRAHM-OLORUNOJE',
+                                    'middleName' => 'IBRAHIM',
                                 ],
-                                'email' => $user->email,
-                                'phoneNumber' => $user->phoneno,
+                                'email' => 'example@example.com',
+                                'phoneNumber' => '07012345678',
                                 'address' => [
-                                    'addressLine_1' => $user->addressLine_1,
-                                    'addressLine_2' => $user->addressLine_2,
-                                    'country' => $user->country,
-                                    'city' => $user->city,
-                                    'postalCode' => $user->postalCode,
-                                    'state' => $user->state,
+                                    'addressLine_1' => '36 Araromi Street',
+                                    'addressLine_2' => 'Onike',
+                                    'country' => 'NG',
+                                    'city' => 'Lagos',
+                                    'postalCode' => 'NA',
+                                    'state' => 'Lagos',
                                 ],
-                                'isSoleProprietor' => $user->isSoleProprietor,
-                                'description' =>  $user->description,
-                                'doingBusinessAs' => ' ' . $firstname .' ' . $lastname .' INC',
+                                'isSoleProprietor' => true,
+                                'description' => 'string',
+                                'doingBusinessAs' => 'JOHN DOE INC',
                                 'identificationLevel2' => [
-                                    'gender' => $user->gender,
-                                    'dateOfBirth' => $user->dateOfBirth,
-                                    'selfieImage' => $user->selfieImage,
-                                    'bvn' => $user->selfieImage,
+                                    'gender' => 'Male',
+                                    'dateOfBirth' => '1994-06-25',
+                                    'selfieImage' => 'bxxvxvxbvasbbxvxvx=',
+                                    'bvn' => '22222222226',
                                 ],
                                 'identificationLevel3' => [
-                                    'idType' => $user->idType,
-                                    'idNumber' => $user->idNumber,
-                                    'expiryDate' => $user->expiryDate,
+                                    'idType' => 'DRIVERS_LICENSE',
+                                    'idNumber' => 'DL123456789',
+                                    'expiryDate' => '2023-06-25',
                                 ],
                             ],
                         ],
@@ -193,33 +196,33 @@ class UserController extends Controller
                         //     'type' => 'IndividualCustomer',
                         //     'attributes' => [
                         //         'fullName' => [
-                        //             'firstName' => 'OMOTAYO',
-                        //             'lastName' => 'BRAHM-OLORUNOJE',
-                        //             'middleName' => 'IBRAHIM',
+                        //             'firstName' => $firstname,
+                        //             'lastName' => $lastname,
+                        //             'middleName' => $user->middleName,
                         //         ],
-                        //         'email' => 'example@example.com',
-                        //         'phoneNumber' => '07012345678',
+                        //         'email' => $user->email,
+                        //         'phoneNumber' => $user->phoneno,
                         //         'address' => [
-                        //             'addressLine_1' => '36 Araromi Street',
-                        //             'addressLine_2' => 'Onike',
-                        //             'country' => 'NG',
-                        //             'city' => 'Lagos',
-                        //             'postalCode' => 'NA',
-                        //             'state' => 'Lagos',
+                        //             'addressLine_1' => $user->addressLine_1,
+                        //             'addressLine_2' => $user->addressLine_2,
+                        //             'country' => $user->country,
+                        //             'city' => $user->city,
+                        //             'postalCode' => $user->postalCode,
+                        //             'state' => $user->state,
                         //         ],
-                        //         'isSoleProprietor' => true,
-                        //         'description' => 'string',
-                        //         'doingBusinessAs' => 'JOHN DOE INC',
+                        //         'isSoleProprietor' => $user->isSoleProprietor,
+                        //         'description' => $user->description,
+                        //         'doingBusinessAs' => "{$firstname} {$lastname} INC",
                         //         'identificationLevel2' => [
-                        //             'gender' => 'Male',
-                        //             'dateOfBirth' => '1994-06-25',
-                        //             'selfieImage' => 'bxxvxvxbvasbbxvxvx=',
-                        //             'bvn' => '22222222226',
+                        //             'gender' => $user->gender,
+                        //             'dateOfBirth' => $user->dateOfBirth,
+                        //             'selfieImage' => $user->selfieImage,
+                        //             'bvn' => $user->bvn,
                         //         ],
                         //         'identificationLevel3' => [
-                        //             'idType' => 'DRIVERS_LICENSE',
-                        //             'idNumber' => 'DL123456789',
-                        //             'expiryDate' => '2023-06-25',
+                        //             'idType' => $user->idType,
+                        //             'idNumber' => $user->idNumber,
+                        //             'expiryDate' => $user->expiryDate,
                         //         ],
                         //     ],
                         // ],
@@ -227,8 +230,9 @@ class UserController extends Controller
                     $responseData = $response->json(); // Return JSON response from the API
 
 
+
                     // verify kyc
-                    $url = "https://api.sandbox.getanchor.co/api/v1/customers/".$responseData['data']['id']."/verification/individual";
+                    $url = "https://api.sandbox.getanchor.co/api/v1/customers/" . $responseData['data']['id'] . "/verification/individual";
                     $body = [
                         "data" => [
                             "type" => "Verification",
@@ -281,7 +285,7 @@ class UserController extends Controller
                     $responseData1 = $response1->json(); // Return JSON response from the API
 
                     // fetch deposit account
-                    $url = 'https://api.sandbox.getanchor.co/api/v1/accounts/'. $responseData['data']['id'] .'?include=DepositAccount';
+                    $url = 'https://api.sandbox.getanchor.co/api/v1/accounts/' . $responseData['data']['id'] . '?include=DepositAccount';
                     $response4 = Http::withHeaders([
                         'accept' => 'application/json',
                         'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
@@ -290,7 +294,7 @@ class UserController extends Controller
 
 
                     // get virtualnuban
-                    $url = "https://api.sandbox.getanchor.co/api/v1/virtual-nubans/".$responseData4['data']['virtualNubans']['data']['id'] ."";
+                    $url = "https://api.sandbox.getanchor.co/api/v1/virtual-nubans/" . $responseData4['data']['virtualNubans']['data']['id'] . "";
                     $response5 = Http::withHeaders([
                         'accept' => 'application/json',
                         'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
@@ -299,16 +303,12 @@ class UserController extends Controller
 
                     // return $response->json(); // Return the JSON response
 
-            
-        
-
-
-
-
                     // save data to database
                     $request->session()->put('balance', $responseData1['data']['availableBalance']);
+                    $request->session()->put('user_id', $responseData['data']['id']);
+                    $request->session()->put('wallet_id', $responseData1['data']['id']);
+                    $request->session()->put('virtual_id', $responseData5['data']['id']);
                     $request->session()->put('bearer', 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8');
-
 
 
                     $wallet = wallet::create([
@@ -334,7 +334,6 @@ class UserController extends Controller
                         'data1' => $responseData1,
                         'data3' => $responseData3
                     ]);
-
                 } catch (\GuzzleHttp\Exception\RequestException $e) {
                     if ($e->hasResponse()) {
                         $response = $e->getResponse();
@@ -365,6 +364,8 @@ class UserController extends Controller
         }
     }
 
+
+
     /**
      * Login The User
      * @param Request $request
@@ -389,8 +390,10 @@ class UserController extends Controller
 
                 // saving wallet details to session
                 $wallet = wallet::where('user_id', $user->id)->first();
+                $request->session()->put('balance', $wallet->balance);
                 $request->session()->put('user_id', $wallet->user_id);
                 $request->session()->put('wallet_id', $wallet->wallet_id);
+                $request->session()->put('virtual_id', $wallet->acct_id);
                 $request->session()->put('transaction_id', $wallet->transaction_id);
 
 
@@ -411,53 +414,10 @@ class UserController extends Controller
                 // Send email to user containing the OTP
                 Mail::to($user->email)->send(new OtpVerificationMail($user->otp));
 
-                $client = new Client();
-
-                $headers = [
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json'
-                ];
-                // Data to be sent in the request body
-                $body = [
-                    'email' => "hello@useurbanpay.com",
-                    'password' => "@Urbanpay247!",
-                    // Add more key-value pairs as needed
-                ];
-
-                $reques = $client->request('POST', 'https://sagecloud.ng/api/v2/merchant/authorization', [
-                    'headers' => $headers,
-                    'json' => $body
-                ]);
-                $res = $reques->getBody()->getContents();
-                $resArray = json_decode($res, true);
-                $access_token = $resArray['data']['token']['access_token'];
-
-
-                // api balance request
-                $headers = [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                    'Authorization' => 'Bearer ' . $access_token . '',
-                ];
-
-
-                $request1 = $client->request('GET', 'https://sagecloud.ng/api/v2/wallet/balance', [
-                    'headers' => $headers
-                ]);
-                $ress = $request1->getBody()->getContents();
-                $ressArray = json_decode($ress, true);
-
-                $request->session()->put('balance', $ressArray['general_wallet']['balance']);
-                $request->session()->put('bearer', $resArray['data']['token']['access_token']);
-
-
                 return response()->json([
-                    // 'token' => $token,
-                    'token' =>  $ressArray['general_wallet']['balance'],
+                    'token' => $otp,
                     'user' => $user,
                     'message' => 'OTP sent successfully',
-                    'auth' => $res,
-                    'getapi' => $ress
                 ], 401);
             }
         } catch (\Throwable $th) {
@@ -610,6 +570,8 @@ class UserController extends Controller
             ], 404);
         }
     }
+
+
 
     public function updateUserProfilePinVerify(Request $request)
     {
@@ -769,22 +731,17 @@ class UserController extends Controller
         try {
 
             // get list of bank
-            $client = new Client();
-            $access_token = $request->session()->get('bearer');
+            $url = 'https://api.sandbox.getanchor.co/api/v1/banks';
 
-            $headers1 = [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer ' . $access_token . ''
-            ];
-            $request1 = $client->request('GET', 'https://sagecloud.ng/api/v2/transfer/get-transfer-data', [
-                'headers' => $headers1
-            ]);
-            $ress1 = $request1->getBody()->getContents();
-            $ressArray1 = json_decode($ress1, true);
+            $response = Http::withHeaders([
+                'accept' => 'application/json',
+                'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
+            ])->get($url);
+
+             $responseData = $response->json(); // Return the JSON response from the API
 
             return response()->json([
-                'msg' => $ress1
+                'msg' => $responseData
             ]);
         } catch (\Throwable $th) {
             return response()->json([
@@ -793,86 +750,136 @@ class UserController extends Controller
             ], 500);
         }
     }
+    public function verifyBank(Request $request)
+    {
+
+        try {
+            $validatedData = $request->validate([
+                'bankIdOrBankCode' => 'required|string',
+                'accountNumber' => 'required|string'
+
+            ]);
+
+
+
+            $url = 'https://api.sandbox.getanchor.co/api/v1/payments/verify-account/' . $validatedData['bankIdOrBankCode'] . '/' . $validatedData['accountNumber'];
+
+            $response = Http::withHeaders([
+                'accept' => 'application/json',
+                'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
+            ])->get($url);
+
+            $responseData = $response->json(); // Return the JSON response from the API
+
+            return response()->json([
+                'msg' => $responseData
+            ]);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
     public function sendMoney(Request $request)
     {
 
         try {
 
-            $request->validate([
-                'reference' => 'nullable|string',
-                'bank_code' => 'required|string',
-                'bank_name' => 'required|string',
-                'account_number' => 'required|string',
-                'account_name' => 'required|string',
-                'amount' => 'required|string',
-                'narration' => 'required|string',
-            ]);
             try {
+
+                // get accountid from session
+                $acct_id = $request->session()->get('wallet_id');
+
+                $wallet = wallet::where('wallet_id', $acct_id);
 
 
                 // verify bank account
-                $client = new Client();
-                $access_token = $request->session()->get('bearer');
-
-                $headers = [
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer ' . $access_token . '',
-                ];
-                $body = '{
-                  "bank_code": "' . $request->bank_code . '",
-                  "account_number": ""' . $request->account_number . '"
-                }';
-                $request1 = $client->request('POST', 'https://sagecloud.ng/api/v2/transfer/verify-bank-account', [
-                    'headers' =>  $headers,
-                    'json' => $body
+                $validatedData = $request->validate([
+                    'bankIdOrBankCode' => 'required|string',
+                    'accountNumber' => 'required|string',
+                    'reference' => 'required|string',
+                    'bank_name' => 'required|string',
+                    'account_name' => 'required|string',
+                    'amount' => 'required|string',
+                    'narration' => 'required|string',
                 ]);
-                $ress = $request1->getBody()->getContents();
-                $ressArray = json_decode($ress, true);
+            
 
+                $url = 'https://api.sandbox.getanchor.co/api/v1/payments/verify-account/' . $validatedData['bankIdOrBankCode'] . '/' . $validatedData['accountNumber'];
 
-                // send  money
-                $headers = [
-                    'Accept' => 'application/json',
+                $response = Http::withHeaders([
+                    'accept' => 'application/json',
+                    'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
+                ])->get($url);
+
+                $responseData = $response->json(); // Return the JSON response from the API
+
+                // create counter party
+                $url = 'https://api.sandbox.getanchor.co/api/v1/counterparties';
+
+                $response1 = Http::withHeaders([
+                    'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
                     'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer ' . $access_token . ''
-                ];
-                // $body = '{
-                //     "reference": "6A3EKXI5M6U7DAVL_tf1",
-                //     "bank_code": "'.$request->bank_code.'",
-                //     "account_number": "'.$request->account_number.'",
-                //     "account_name": "'.$request->account_name.'",
-                //     "amount": "'.$request->amount.'",
-                //     "narration": "'.$request->narration.'"
-                // }';
-                $body = '{
-                    "reference": "6A3EKXI5M6U7DAVL_tf1",
-                    "bank_code": "044",
-                    "account_number": "0058381844",
-                    "account_name": "Samson Okemakinde",
-                    "amount": "100",
-                    "narration": "Test Transfer"
-                }';
-                $request2 = $client->request('POST', 'https://sagecloud.ng/api/v2/transfer/fund-transfer', [
-                    'headers' => $headers,
-                    'json' => $body
+                ])->post($url, [
+                    'data' => [
+                        'type' => 'CounterParty',
+                        'attributes' => [
+                            'accountName' =>  $responseData['data']['attributes']['accountName'], //'OLAMODE ADE SOBOKUNLE',
+                            'accountNumber' => $responseData['data']['attributes']['accountNumber'], //'0068970263',
+                            'bankCode' => $responseData['data']['attributes']['bank']['nipCode'], //'000007'
+                        ]
+                    ]
                 ]);
-                $response = $request2->getBody()->getContents();
 
+                $responseData1 = $response1->json(); // Return the JSON response from the API
 
+                // create transfer
+                $url = 'https://api.sandbox.getanchor.co/api/v1/transfers';
 
+                $response2 = Http::withHeaders([
+                    'Content-Type' => 'application/json',
+                    'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
+                ])->post($url, [
+                    "data" => [
+                        "type" => "NIPTransfer",
+                        "attributes" => [
+                            "amount" => $validatedData['bankIdOrBankCode'],
+                            "currency" => "NGN",
+                            "reason" => $validatedData['narration'], //"Olamide 3 again",
+                            "reference" => $validatedData['reference'], //"232hfndnbi2r72rgf29ufgb"
+                        ],
+                        "relationships" => [
+                            "account" => [
+                                "data" => [
+                                    "id" => $acct_id, //"16517725619924-anc_acc",
+                                    "type" => "DepositAccount"
+                                ]
+                            ],
+                            "counterParty" => [
+                                "data" => [
+                                    "id" => $responseData1['id'], //"16518495829780-anc_cp",
+                                    "type" => "CounterParty"
+                                ]
+                            ]
+                        ]
+                    ]
+                ]);
+                $responseData2 = $response2->json(); // Return the JSON response from the API
 
                 $transaction = transaction::create([
                     'user_id' => $request->session()->get('user_id'),
                     'wallet_id' => $request->session()->get('wallet_id'),
                     'transaction_id' => $request->session()->get('transaction_id'),
                     'reference' => $request->reference,
-                    'bank_code' => $request->bank_code,
+                    'bankIdOrBankCode' => $request->bankIdOrBankCode,
                     'bank_name' => $request->bank_name,
                     'account_number' => $request->account_number,
                     'account_name' => $request->account_name,
                     'amount' => $request->amount,
-                    'urbanPayTag' => $request->urbanPayTag,
+                    'urbanPayTag' => $wallet->urbanPayTag,
                     'narration' => $request->narration,
                     'status' => 'success',
                 ]);
@@ -882,16 +889,19 @@ class UserController extends Controller
                     'wallet_id' => $request->session()->get('wallet_id'),
                     'transaction_id' => $request->session()->get('transaction_id'),
                     'reference' => $request->reference,
-                    'bank_code' => $request->bank_code,
+                    'bankIdOrBankCode' => $request->bankIdOrBankCode,
                     'bank_name' => $request->bank_name,
                     'account_number' => $request->account_number,
                     'account_name' => $request->account_name,
-                    'urbanPayTag' => $request->urbanPayTag,
+                    'urbanPayTag' => $wallet->urbanPayTag,
                 ]);
+
                 return response()->json([
-                    'message' => $ress,
-                    'msg' => $response,
+                    'data' => $responseData,
+                    'data1' => $responseData1,
+                    'data2' => $responseData2,
                 ], 500);
+
             } catch (\Throwable $e) {
                 return response()->json([
                     'status' => false,
@@ -905,6 +915,8 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+
     public function sendMoneyWithTag(Request $request)
     {
 
@@ -1025,16 +1037,50 @@ class UserController extends Controller
     {
         try {
             # code...
-            $user_id = $request->session()->get('user_id');
+            // $user_id = $request->session()->get('user_id');
             $wallet_id = $request->session()->get('wallet_id');
-            // $wallets = wallet::where('user_id', $user_id)->first();
-            $wallets = DB::table('wallets')
-                ->where('user_id', '=', $user_id)
-                ->where('wallet_id', '=', $wallet_id)
-                ->get();
+            $wallets = wallet::where('wallet_id', $wallet_id)->first();
+            // $wallets = DB::table('wallets')
+            //     ->where('user_id', '=', $user_id)
+            //     ->where('wallet_id', '=', $wallet_id)
+            //     ->get();
 
             return response()->json([
                 'data' => $wallets
+            ], 200);
+
+        } catch (\Throwable $e) {
+            # code...
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function transactionGetALL(Request $request)
+    {
+        try {
+            # code...
+            // $user_id = $request->session()->get('user_id');
+            // $wallet_id = $request->session()->get('wallet_id');
+            // // $wallets = wallet::where('user_id', $user_id)->first();
+            // $transactions = DB::table('transactions')
+            //     ->where('user_id', '=', $user_id)
+            //     ->where('wallet_id', '=', $wallet_id)
+            //     ->get();
+
+
+            $url = 'https://api.sandbox.getanchor.co/api/v1/transactions';
+
+            $response = Http::withHeaders([
+                'accept' => 'application/json',
+                'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
+            ])->get($url);
+    
+            $responseData = $response->json(); // Return the JSON response from the API
+
+            return response()->json([
+                // 'data' => $transactions,
+                'data1' => $responseData
             ], 200);
         } catch (\Throwable $e) {
             # code...
@@ -1046,17 +1092,21 @@ class UserController extends Controller
     public function transactionGet(Request $request)
     {
         try {
-            # code...
-            $user_id = $request->session()->get('user_id');
-            $wallet_id = $request->session()->get('wallet_id');
-            // $wallets = wallet::where('user_id', $user_id)->first();
-            $transactions = DB::table('transactions')
-                ->where('user_id', '=', $user_id)
-                ->where('wallet_id', '=', $wallet_id)
-                ->get();
+            $validatedData = $request->validate([
+                'transactionId' => 'required|string',
+            ]);
+            $url = 'https://api.sandbox.getanchor.co/api/v1/transactions/' . $validatedData['transactionId'];
+
+            $response = Http::withHeaders([
+                'accept' => 'application/json',
+                'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
+            ])->get($url);
+    
+            $responseData = $response->json(); // Return the JSON response from the API
 
             return response()->json([
-                'data' => $transactions
+                // 'data' => $transactions,
+                'data1' => $responseData
             ], 200);
         } catch (\Throwable $e) {
             # code...
@@ -1065,4 +1115,6 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+
 }
