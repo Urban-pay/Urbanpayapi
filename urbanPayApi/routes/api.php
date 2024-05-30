@@ -37,4 +37,5 @@ Route::post('/auth/sendMoney/', [UserController::class, 'sendMoney']);
 Route::post('/auth/sendMoneyWithTag/', [UserController::class, 'sendMoneyWithTag']);
 Route::post('/auth/addMoney/', [UserController::class, 'addMoney']);
 Route::post('/auth/transactionGet/', [UserController::class, 'transactionGet']);
-Route::post('/auth/transactionGetALL/', [UserController::class, 'transactionGet']);
+Route::post('/auth/transactionGetALL/', [UserController::class, 'transactionGetALL']);
+Route::post('/auth/listUser/', [UserController::class, 'listUser']);

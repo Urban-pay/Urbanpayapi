@@ -150,9 +150,6 @@ class UserController extends Controller
                     $firstname = $words[0]; // First word
                     $lastname = $words[1]; // Second word
 
-
-
-
                     $response = Http::withHeaders([
                         'accept' => 'application/json',
                         'content-type' => 'application/json',
@@ -162,12 +159,12 @@ class UserController extends Controller
                             'type' => 'IndividualCustomer',
                             'attributes' => [
                                 'fullName' => [
-                                    'firstName' => 'OMOTAYO',
-                                    'lastName' => 'BRAHM-OLORUNOJE',
-                                    'middleName' => 'IBRAHIM',
+                                    'firstName' => 'Toluwanimi',
+                                    'lastName' => 'Adejumobi',
+                                    'middleName' => 'ephraim',
                                 ],
-                                'email' => 'example@example.com',
-                                'phoneNumber' => '07012345678',
+                                'email' => 'adejumobitoluwanimi22@gmail.com',
+                                'phoneNumber' => '09030388749',
                                 'address' => [
                                     'addressLine_1' => '36 Araromi Street',
                                     'addressLine_2' => 'Onike',
@@ -178,12 +175,12 @@ class UserController extends Controller
                                 ],
                                 'isSoleProprietor' => true,
                                 'description' => 'string',
-                                'doingBusinessAs' => 'JOHN DOE INC',
+                                'doingBusinessAs' => 'Toluwanimi Adejumobi INC',
                                 'identificationLevel2' => [
                                     'gender' => 'Male',
                                     'dateOfBirth' => '1994-06-25',
                                     'selfieImage' => 'bxxvxvxbvasbbxvxvx=',
-                                    'bvn' => '22222222226',
+                                    'bvn' => '22222222229',
                                 ],
                                 'identificationLevel3' => [
                                     'idType' => 'DRIVERS_LICENSE',
@@ -192,44 +189,42 @@ class UserController extends Controller
                                 ],
                             ],
                         ],
-                        // 'data' => [
-                        //     'type' => 'IndividualCustomer',
-                        //     'attributes' => [
-                        //         'fullName' => [
-                        //             'firstName' => $firstname,
-                        //             'lastName' => $lastname,
-                        //             'middleName' => $user->middleName,
-                        //         ],
-                        //         'email' => $user->email,
-                        //         'phoneNumber' => $user->phoneno,
-                        //         'address' => [
-                        //             'addressLine_1' => $user->addressLine_1,
-                        //             'addressLine_2' => $user->addressLine_2,
-                        //             'country' => $user->country,
-                        //             'city' => $user->city,
-                        //             'postalCode' => $user->postalCode,
-                        //             'state' => $user->state,
-                        //         ],
-                        //         'isSoleProprietor' => $user->isSoleProprietor,
-                        //         'description' => $user->description,
-                        //         'doingBusinessAs' => "{$firstname} {$lastname} INC",
-                        //         'identificationLevel2' => [
-                        //             'gender' => $user->gender,
-                        //             'dateOfBirth' => $user->dateOfBirth,
-                        //             'selfieImage' => $user->selfieImage,
-                        //             'bvn' => $user->bvn,
-                        //         ],
-                        //         'identificationLevel3' => [
-                        //             'idType' => $user->idType,
-                        //             'idNumber' => $user->idNumber,
-                        //             'expiryDate' => $user->expiryDate,
-                        //         ],
-                        //     ],
-                        // ],
                     ]);
+                    // 'data' => [
+                    //     'type' => 'IndividualCustomer',
+                    //     'attributes' => [
+                    //         'fullName' => [
+                    //             'firstName' => $firstname,
+                    //             'lastName' => $lastname,
+                    //             'middleName' => $user->middleName,
+                    //         ],
+                    //         'email' => $user->email,
+                    //         'phoneNumber' => $user->phoneno,
+                    //         'address' => [
+                    //             'addressLine_1' => $user->addressLine_1,
+                    //             'addressLine_2' => $user->addressLine_2,
+                    //             'country' => $user->country,
+                    //             'city' => $user->city,
+                    //             'postalCode' => $user->postalCode,
+                    //             'state' => $user->state,
+                    //         ],
+                    //         'isSoleProprietor' => $user->isSoleProprietor,
+                    //         'description' => $user->description,
+                    //         'doingBusinessAs' => "{$firstname} {$lastname} INC",
+                    //         'identificationLevel2' => [
+                    //             'gender' => $user->gender,
+                    //             'dateOfBirth' => $user->dateOfBirth,
+                    //             'selfieImage' => $user->selfieImage,
+                    //             'bvn' => $user->bvn,
+                    //         ],
+                    //         'identificationLevel3' => [
+                    //             'idType' => $user->idType,
+                    //             'idNumber' => $user->idNumber,
+                    //             'expiryDate' => $user->expiryDate,
+                    //         ],
+                    //     ],
+                    // ],
                     $responseData = $response->json(); // Return JSON response from the API
-
-
 
                     // verify kyc
                     $url = "https://api.sandbox.getanchor.co/api/v1/customers/" . $responseData['data']['id'] . "/verification/individual";
@@ -523,6 +518,31 @@ class UserController extends Controller
     }
 
     // show one
+    public function listUser()
+    {
+        $url = 'https://api.sandbox.getanchor.co/api/v1/customers';
+        
+        $response = Http::withHeaders([
+            'accept' => 'application/json',
+            'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
+        ])->get($url);
+
+        $responseData =  $response->json(); // Return the JSON response from the API
+        $url = 'https://api.sandbox.getanchor.co/api/v1/virtual-nubans';
+        
+        $response1 = Http::withHeaders([
+            'accept' => 'application/json',
+            'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
+        ])->get($url);
+
+        $responseData1 =  $response1->json(); // Return the JSON response from the API
+        return response()->json([
+            'data' => $responseData,
+            'data1' => $responseData1
+        ]);
+    }
+
+
     public function singleUser($id)
     {
         $user = User::find($id);
@@ -738,7 +758,7 @@ class UserController extends Controller
                 'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
             ])->get($url);
 
-             $responseData = $response->json(); // Return the JSON response from the API
+            $responseData = $response->json(); // Return the JSON response from the API
 
             return response()->json([
                 'msg' => $responseData
@@ -774,7 +794,6 @@ class UserController extends Controller
             return response()->json([
                 'msg' => $responseData
             ]);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -791,9 +810,10 @@ class UserController extends Controller
             try {
 
                 // get accountid from session
-                $acct_id = $request->session()->get('wallet_id');
+                $acct_id = '17164168624170-anc_acc';
+                // $acct_id = $request->session()->get('wallet_id');
 
-                $wallet = wallet::where('wallet_id', $acct_id);
+                // $wallet = wallet::where('wallet_id', $acct_id);
 
 
                 // verify bank account
@@ -806,7 +826,7 @@ class UserController extends Controller
                     'amount' => 'required|string',
                     'narration' => 'required|string',
                 ]);
-            
+
 
                 $url = 'https://api.sandbox.getanchor.co/api/v1/payments/verify-account/' . $validatedData['bankIdOrBankCode'] . '/' . $validatedData['accountNumber'];
 
@@ -846,7 +866,7 @@ class UserController extends Controller
                     "data" => [
                         "type" => "NIPTransfer",
                         "attributes" => [
-                            "amount" => $validatedData['bankIdOrBankCode'],
+                            "amount" => $validatedData['amount'],
                             "currency" => "NGN",
                             "reason" => $validatedData['narration'], //"Olamide 3 again",
                             "reference" => $validatedData['reference'], //"232hfndnbi2r72rgf29ufgb"
@@ -860,7 +880,7 @@ class UserController extends Controller
                             ],
                             "counterParty" => [
                                 "data" => [
-                                    "id" => $responseData1['id'], //"16518495829780-anc_cp",
+                                    "id" => $responseData1['data']['id'], //"16518495829780-anc_cp",
                                     "type" => "CounterParty"
                                 ]
                             ]
@@ -869,39 +889,60 @@ class UserController extends Controller
                 ]);
                 $responseData2 = $response2->json(); // Return the JSON response from the API
 
+                // verify transfer
+                $url = 'https://api.sandbox.getanchor.co/api/v1/transfers/verify/' . $responseData2['data']['id'];
+        
+                $response3 = Http::withHeaders([
+                    'accept' => 'application/json',
+                    'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
+                ])->get($url);
+        
+                $responseData3 = $response3->json(); // Return the JSON response from the API
+
+                $urbanPayTag = 'sam';
+                // $wallet->urbanPayTag = 'sam';
                 $transaction = transaction::create([
-                    'user_id' => $request->session()->get('user_id'),
-                    'wallet_id' => $request->session()->get('wallet_id'),
-                    'transaction_id' => $request->session()->get('transaction_id'),
+                    'user_id' =>'17164158629698-anc_ind_cst',
+                    'wallet_id' => '17164168624170-anc_acc',
+                    'transaction_id' => mt_rand(0, 999999),
+                    // 'user_id' => $request->session()->get('user_id'),
+                    // 'wallet_id' => $request->session()->get('wallet_id'),
+                    // 'transaction_id' => $request->session()->get('transaction_id'),
                     'reference' => $request->reference,
-                    'bankIdOrBankCode' => $request->bankIdOrBankCode,
+                    // 'reference' => $uniqueId,
+                    'bank_code' => $request->bankIdOrBankCode,
                     'bank_name' => $request->bank_name,
-                    'account_number' => $request->account_number,
+                    'account_number' => $request->accountNumber,
                     'account_name' => $request->account_name,
                     'amount' => $request->amount,
-                    'urbanPayTag' => $wallet->urbanPayTag,
+                    'urbanPayTag' => $urbanPayTag,
                     'narration' => $request->narration,
                     'status' => 'success',
                 ]);
-
+                // 4397016384
+                // 17164181504227-anc_va
                 $beneficiary = beneficiary::create([
-                    'user_id' => $request->session()->get('user_id'),
-                    'wallet_id' => $request->session()->get('wallet_id'),
-                    'transaction_id' => $request->session()->get('transaction_id'),
+                    'user_id' =>'17164158629698-anc_ind_cst',
+                    'wallet_id' => '17164168624170-anc_acc',
+                    'transaction_id' => mt_rand(0, 999999),
+                    // 'user_id' => $request->session()->get('user_id'),
+                    // 'wallet_id' => $request->session()->get('wallet_id'),
+                    // 'transaction_id' => $request->session()->get('transaction_id'),
                     'reference' => $request->reference,
-                    'bankIdOrBankCode' => $request->bankIdOrBankCode,
+                    // 'reference' => $uniqueId,
+                    'bank_code' => $request->bankIdOrBankCode,
                     'bank_name' => $request->bank_name,
-                    'account_number' => $request->account_number,
+                    'account_number' => $request->accountNumber,
                     'account_name' => $request->account_name,
-                    'urbanPayTag' => $wallet->urbanPayTag,
+                    'urbanPayTag' => $urbanPayTag,
                 ]);
 
                 return response()->json([
                     'data' => $responseData,
                     'data1' => $responseData1,
                     'data2' => $responseData2,
+                    'data3' => $responseData3
                 ], 500);
-
             } catch (\Throwable $e) {
                 return response()->json([
                     'status' => false,
@@ -923,7 +964,7 @@ class UserController extends Controller
         try {
 
             $request->validate([
-                // 'reference' => 'required|string',
+                'reference' => 'required|string',
                 'bank_code' => 'required|string',
                 'amount' => 'required|string',
                 'urbanPayTag' => 'nullable|string',
@@ -1048,7 +1089,6 @@ class UserController extends Controller
             return response()->json([
                 'data' => $wallets
             ], 200);
-
         } catch (\Throwable $e) {
             # code...
             return response()->json([
@@ -1068,20 +1108,27 @@ class UserController extends Controller
             //     ->where('wallet_id', '=', $wallet_id)
             //     ->get();
 
-
-            $url = 'https://api.sandbox.getanchor.co/api/v1/transactions';
-
+            $url = 'https://api.sandbox.getanchor.co/api/v1/transfers';
+        
             $response = Http::withHeaders([
                 'accept' => 'application/json',
                 'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
             ])->get($url);
-    
+
+            // $url = 'https://api.sandbox.getanchor.co/api/v1/transactions';
+
+            // $response = Http::withHeaders([
+            //     'accept' => 'application/json',
+            //     'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
+            // ])->get($url);
+
             $responseData = $response->json(); // Return the JSON response from the API
 
             return response()->json([
                 // 'data' => $transactions,
                 'data1' => $responseData
             ], 200);
+
         } catch (\Throwable $e) {
             # code...
             return response()->json([
@@ -1095,13 +1142,22 @@ class UserController extends Controller
             $validatedData = $request->validate([
                 'transactionId' => 'required|string',
             ]);
-            $url = 'https://api.sandbox.getanchor.co/api/v1/transactions/' . $validatedData['transactionId'];
 
+            $url = 'https://api.sandbox.getanchor.co/api/v1/transfers/' . $validatedData['transactionId'];
+        
             $response = Http::withHeaders([
                 'accept' => 'application/json',
                 'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
             ])->get($url);
     
+
+            // $url = 'https://api.sandbox.getanchor.co/api/v1/transactions/' . $validatedData['transactionId'];
+
+            // $response = Http::withHeaders([
+            //     'accept' => 'application/json',
+            //     'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
+            // ])->get($url);
+
             $responseData = $response->json(); // Return the JSON response from the API
 
             return response()->json([
@@ -1115,6 +1171,4 @@ class UserController extends Controller
             ], 500);
         }
     }
-
-
 }
