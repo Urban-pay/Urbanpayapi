@@ -9,6 +9,7 @@ use App\Models\otp;
 use App\Models\wallet;
 use App\Models\transaction;
 use App\Models\beneficiary;
+use App\Models\notifications;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use App\Mail\OtpVerificationMail;
 use App\Mail\pinVerification;
+use App\Mail\notificationMail;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
@@ -279,6 +281,8 @@ class UserController extends Controller
                     ]);
                     $responseData1 = $response1->json(); // Return JSON response from the API
 
+               
+
                     // fetch deposit account
                     $url = 'https://api.sandbox.getanchor.co/api/v1/accounts/' . $responseData['data']['id'] . '?include=DepositAccount';
                     $response4 = Http::withHeaders([
@@ -323,6 +327,14 @@ class UserController extends Controller
                         'account_reference' => 'null',
                         'status' => $responseData5['data']['status'],
                     ]);
+
+                    $notification = notifications::create([
+                        'user_id' => $request->session()->get('email'),
+                        'title' => 'Account Creation',
+                        'message' => 'Your Account has been created succesfully.'
+                    ]);
+                    // Send notfication email to user containing the OTP
+                    Mail::to($user->email)->send(new notificationMail('Account Creation', 'Your Account has been created succesfully.'));
 
                     return response()->json([
                         'data' => $responseData,
@@ -408,6 +420,17 @@ class UserController extends Controller
 
                 // Send email to user containing the OTP
                 Mail::to($user->email)->send(new OtpVerificationMail($user->otp));
+
+                // inserting notifcation
+                $title = "Welcome back, {$user->firstName} {$user->lastName}";
+                $msg = 'You have successfully logged in.';
+                $notification = notifications::create([
+                    'user_id' => $request->session->get('user_id'),
+                    'title' => $title,
+                    'message' => $msg
+                ]);
+                // Send notfication email to user containing the OTP
+                Mail::to($user->email)->send(new notificationMail($title, $msg));
 
                 return response()->json([
                     'token' => $otp,
@@ -499,6 +522,24 @@ class UserController extends Controller
 
             // Delete the user from the current database
             $user->delete();
+            // Delete the user from the anchor database
+            $response = Http::withHeaders([
+                'accept' => 'application/json',
+                'content-type' => 'application/json',
+                'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8'
+            ])->get('https://api.sandbox.getanchor.co/api/v1/customers/'. $request->session->get('user_id') .'');
+            $responseData = $response->json();
+            // inserting notifcation
+            $title = "User Deleted";
+            $msg = 'The user has been successfully deleted.';
+            $notification = notifications::create([
+                'user_id' => $request->session->get('user_id'),
+                'title' => $title,
+                'message' => $msg
+            ]);
+            // Send notfication email to user containing the OTP
+            Mail::to($user->email)->send(new notificationMail($title, $msg));
+
             // Upload the user data to another database
             //  DB::connection('urbanPayApi')->table('deletedusers')->insert($userData);
             //    $deleteduser = deleteduser::create([
@@ -509,7 +550,7 @@ class UserController extends Controller
             //         'password' => $user->password,
             //         'pin' => $user->pin
             //     ]);
-            return response()->json(['message' => 'Deleted successfully']);
+            return response()->json(['message' => 'Deleted successfully', 'data' => $responseData]);
         } catch (\Exception $e) {
             // Handle upload failure
 
@@ -521,7 +562,7 @@ class UserController extends Controller
     public function listUser()
     {
         $url = 'https://api.sandbox.getanchor.co/api/v1/customers';
-        
+
         $response = Http::withHeaders([
             'accept' => 'application/json',
             'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
@@ -529,7 +570,7 @@ class UserController extends Controller
 
         $responseData =  $response->json(); // Return the JSON response from the API
         $url = 'https://api.sandbox.getanchor.co/api/v1/virtual-nubans';
-        
+
         $response1 = Http::withHeaders([
             'accept' => 'application/json',
             'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
@@ -580,6 +621,18 @@ class UserController extends Controller
                 'username' => $request->username,
                 'phoneno' => $request->phoneno,
             ]);
+
+               // inserting notifcation
+               $title = "Profile Updated Successfully!";
+               $msg = 'Profile Updated Successfully!';
+               $notification = notifications::create([
+                   'user_id' => $request->session->get('user_id'),
+                   'title' => $title,
+                   'message' => $msg
+               ]);
+               // Send notfication email to user containing the OTP
+               Mail::to($request->session()->get('email'))->send(new notificationMail($title, $msg));
+   
 
             return response()->json([
                 "message" => "Profile Updated"
@@ -682,6 +735,27 @@ class UserController extends Controller
             // Perform necessary actions (e.g., mark email as verified)
             $otp->verify = 'yes';
             $otp->save();
+                    // inserting notifcation
+                    $title = "Profile Updated Successfully!";
+                    $msg = 'Profile Updated Successfully!';
+                    $notification = notifications::create([
+                        'user_id' => $request->session->get('user_id'),
+                        'title' => $title,
+                        'message' => $msg
+                    ]);
+                    // Send notfication email to user containing the OTP
+                    Mail::to($request->session()->get('email'))->send(new notificationMail($title, $msg));
+            // inserting notifcation
+            $title = "Pin Updated Successfully!";
+            $msg = 'Pin Updated Successfully!';
+            $notification = notifications::create([
+                'user_id' => $request->session->get('user_id'),
+                'title' => $title,
+                'message' => $msg
+            ]);
+            // Send notfication email to user containing the OTP
+            Mail::to($request->session()->get('email'))->send(new notificationMail($title, $msg));
+    
             if (User::where('email', $email)->exists()) {
                 User::where('email', $email)->update([
                     'pin' => Hash::make($pin),
@@ -811,9 +885,9 @@ class UserController extends Controller
 
                 // get accountid from session
                 $acct_id = '17164168624170-anc_acc';
-                // $acct_id = $request->session()->get('wallet_id');
+                $acct_id = $request->session()->get('wallet_id');
 
-                // $wallet = wallet::where('wallet_id', $acct_id);
+                $wallet = wallet::where('wallet_id', $acct_id);
 
 
                 // verify bank account
@@ -891,12 +965,12 @@ class UserController extends Controller
 
                 // verify transfer
                 $url = 'https://api.sandbox.getanchor.co/api/v1/transfers/verify/' . $responseData2['data']['id'];
-        
+
                 $response3 = Http::withHeaders([
                     'accept' => 'application/json',
                     'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
                 ])->get($url);
-        
+
                 $responseData3 = $response3->json(); // Return the JSON response from the API
 
                 $urbanPayTag = 'sam';
@@ -936,7 +1010,26 @@ class UserController extends Controller
                     'account_name' => $request->account_name,
                     'urbanPayTag' => $urbanPayTag,
                 ]);
+                // fetching balance 
+                $url = 'https://api.sandbox.getanchor.co/api/v1/accounts/balance/' . $acct_id;
+        
+                $response4 = Http::withHeaders([
+                    'accept' => 'application/json',
+                ])->get($url);
+        
+                $responseData4 = $response4->json(); // Return the JSON response from the API
 
+                // inserting notifcation
+                $title = "Transfer Successful";
+                $msg = "Your payment of NGN {$request->amount} to " . $responseData['data']['attributes']['accountName'] ." has been processed successfully. Your new balance is NGN ". $responseData4['data']['availableBalance'] ." ";
+                $notification = notifications::create([
+                    'user_id' => $request->session->get('user_id'),
+                    'title' => $title,
+                    'message' => $msg
+                ]);
+
+                // Send notfication email to user containing the OTP
+                Mail::to($request->session()->get('email'))->send(new notificationMail($title, $msg));
                 return response()->json([
                     'data' => $responseData,
                     'data1' => $responseData1,
@@ -1109,7 +1202,7 @@ class UserController extends Controller
             //     ->get();
 
             $url = 'https://api.sandbox.getanchor.co/api/v1/transfers';
-        
+
             $response = Http::withHeaders([
                 'accept' => 'application/json',
                 'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
@@ -1144,12 +1237,12 @@ class UserController extends Controller
             ]);
 
             $url = 'https://api.sandbox.getanchor.co/api/v1/transfers/' . $validatedData['transactionId'];
-        
+
             $response = Http::withHeaders([
                 'accept' => 'application/json',
                 'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
             ])->get($url);
-    
+
 
             // $url = 'https://api.sandbox.getanchor.co/api/v1/transactions/' . $validatedData['transactionId'];
 
@@ -1171,4 +1264,5 @@ class UserController extends Controller
             ], 500);
         }
     }
+
 }
