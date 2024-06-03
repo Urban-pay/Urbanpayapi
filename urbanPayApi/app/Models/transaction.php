@@ -18,10 +18,15 @@ class transaction extends Model
         'account_name',
         'account_number',
         'bank_name',
-        'amount',
         'bank_code',
+        'toBank_code',
+        'toBank_name',
+        'toAccount_number',
+        'toAccount_name',
+        'amount',
         'narration',
         'reference',
         'status',
+      
     ];
 }

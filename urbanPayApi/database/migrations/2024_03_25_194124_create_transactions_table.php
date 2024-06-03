@@ -25,7 +25,9 @@ return new class extends Migration
             $table->string('narration');
             $table->string('reference');
             $table->string('status');
+         
             $table->timestamps();
+            
         });
     }
 

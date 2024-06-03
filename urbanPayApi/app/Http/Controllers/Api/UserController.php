@@ -890,7 +890,6 @@ class UserController extends Controller
                 $wallet = wallet::where('wallet_id', $acct_id);
 
 
-                // verify bank account
                 $validatedData = $request->validate([
                     'bankIdOrBankCode' => 'required|string',
                     'accountNumber' => 'required|string',
@@ -900,8 +899,9 @@ class UserController extends Controller
                     'amount' => 'required|string',
                     'narration' => 'required|string',
                 ]);
-
-
+                
+                
+                // verify bank account
                 $url = 'https://api.sandbox.getanchor.co/api/v1/payments/verify-account/' . $validatedData['bankIdOrBankCode'] . '/' . $validatedData['accountNumber'];
 
                 $response = Http::withHeaders([
@@ -975,6 +975,7 @@ class UserController extends Controller
 
                 $urbanPayTag = 'sam';
                 // $wallet->urbanPayTag = 'sam';
+                
                 $transaction = transaction::create([
                     'user_id' =>'17164158629698-anc_ind_cst',
                     'wallet_id' => '17164168624170-anc_acc',
@@ -983,18 +984,21 @@ class UserController extends Controller
                     // 'wallet_id' => $request->session()->get('wallet_id'),
                     // 'transaction_id' => $request->session()->get('transaction_id'),
                     'reference' => $request->reference,
-                    // 'reference' => $uniqueId,
-                    'bank_code' => $request->bankIdOrBankCode,
-                    'bank_name' => $request->bank_name,
-                    'account_number' => $request->accountNumber,
-                    'account_name' => $request->account_name,
+                    'toBank_code' => $request->bankIdOrBankCode,
+                    'toBank_name' => $request->bank_name,
+                    'toAccount_number' => $request->accountNumber,
+                    'toAccount_name' => $request->account_name,
+                    'account_number' => $responseData['data']['attributes']['accountNumber'],
+                    'account_name' => $responseData['data']['attributes']['accountName'],
+                    'bank_code' => $responseData['data']['attributes']['bank']['nipCode'],
+                    'bank_name' => $responseData['data']['attributes']['bank']['name'],
                     'amount' => $request->amount,
-                    'urbanPayTag' => $urbanPayTag,
                     'narration' => $request->narration,
                     'status' => 'success',
                 ]);
                 // 4397016384
                 // 17164181504227-anc_va
+
                 $beneficiary = beneficiary::create([
                     'user_id' =>'17164158629698-anc_ind_cst',
                     'wallet_id' => '17164168624170-anc_acc',
@@ -1021,7 +1025,7 @@ class UserController extends Controller
 
                 // inserting notifcation
                 $title = "Transfer Successful";
-                $msg = "Your payment of NGN {$request->amount} to " . $responseData['data']['attributes']['accountName'] ." has been processed successfully. Your new balance is NGN ". $responseData4['data']['availableBalance'] ." ";
+                $msg = "Your payment of NGN {$request->amount} to " . $responseData1['data']['attributes']['accountName'] ." has been processed successfully. Your new balance is NGN ". $responseData4['data']['availableBalance'] ." ";
                 $notification = notifications::create([
                     'user_id' => $request->session->get('user_id'),
                     'title' => $title,
