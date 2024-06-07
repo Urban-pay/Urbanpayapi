@@ -281,7 +281,7 @@ class UserController extends Controller
                     ]);
                     $responseData1 = $response1->json(); // Return JSON response from the API
 
-               
+
 
                     // fetch deposit account
                     $url = 'https://api.sandbox.getanchor.co/api/v1/accounts/' . $responseData['data']['id'] . '?include=DepositAccount';
@@ -371,8 +371,6 @@ class UserController extends Controller
         }
     }
 
-
-
     /**
      * Login The User
      * @param Request $request
@@ -446,7 +444,6 @@ class UserController extends Controller
         }
     }
 
-
     public function pin(Request $request)
     {
         try {
@@ -482,7 +479,6 @@ class UserController extends Controller
         }
         # code...
     }
-
 
     public function verifyOtp(Request $request)
     {
@@ -632,7 +628,7 @@ class UserController extends Controller
                ]);
                // Send notfication email to user containing the OTP
                Mail::to($request->session()->get('email'))->send(new notificationMail($title, $msg));
-   
+
 
             return response()->json([
                 "message" => "Profile Updated"
@@ -755,7 +751,7 @@ class UserController extends Controller
             ]);
             // Send notfication email to user containing the OTP
             Mail::to($request->session()->get('email'))->send(new notificationMail($title, $msg));
-    
+
             if (User::where('email', $email)->exists()) {
                 User::where('email', $email)->update([
                     'pin' => Hash::make($pin),
@@ -899,8 +895,8 @@ class UserController extends Controller
                     'amount' => 'required|string',
                     'narration' => 'required|string',
                 ]);
-                
-                
+
+
                 // verify bank account
                 $url = 'https://api.sandbox.getanchor.co/api/v1/payments/verify-account/' . $validatedData['bankIdOrBankCode'] . '/' . $validatedData['accountNumber'];
 
@@ -975,7 +971,7 @@ class UserController extends Controller
 
                 $urbanPayTag = 'sam';
                 // $wallet->urbanPayTag = 'sam';
-                
+
                 $transaction = transaction::create([
                     'user_id' =>'17164158629698-anc_ind_cst',
                     'wallet_id' => '17164168624170-anc_acc',
@@ -1014,13 +1010,13 @@ class UserController extends Controller
                     'account_name' => $request->account_name,
                     'urbanPayTag' => $urbanPayTag,
                 ]);
-                // fetching balance 
+                // fetching balance
                 $url = 'https://api.sandbox.getanchor.co/api/v1/accounts/balance/' . $acct_id;
-        
+
                 $response4 = Http::withHeaders([
                     'accept' => 'application/json',
                 ])->get($url);
-        
+
                 $responseData4 = $response4->json(); // Return the JSON response from the API
 
                 // inserting notifcation
@@ -1053,7 +1049,6 @@ class UserController extends Controller
             ], 500);
         }
     }
-
 
     public function sendMoneyWithTag(Request $request)
     {
@@ -1268,5 +1263,122 @@ class UserController extends Controller
             ], 500);
         }
     }
+    public function logout(Request $request)
+    {
+        try {
+
+                // Remove multiple items from the session
+                $request->session()->forget(['email', 'name', 'username', 'user_id', 'balance', 'wallet_id', 'virtual_id', 'transaction_id']);
+
+
+            return response()->json([
+                "message" =>  "Successfully logged out"
+            ], 200);
+        } catch (\Throwable $e) {
+            # code...
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function UserdetailsByteBridge(Request $request)
+    {
+        try {
+            $url = 'https://bytebridge.com.ng/api/user/';
+            $token = 'e3822593c7c9f818b613cbd9d5bd078d3fdf7de4';
+            $response = Http::withHeaders([
+                'Authorization' => "Token {$token}",
+                'Content-Type' => 'application/json',
+            ])->get($url);
+    
+            $responseData = $response->json(); // Return the JSON response from the API
+
+            return response()->json([
+                "data" =>  $responseData
+            ], 200);
+        } catch (\Throwable $e) {
+            # code...
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function BuyData(Request $request)
+    {
+        try {
+            $url = 'https://bytebridge.com.ng/api/data/';
+        
+            $headers = [
+                'Authorization' => 'Token e3822593c7c9f818b613cbd9d5bd078d3fdf7de4',
+                'Content-Type' => 'application/json',
+            ];
+            
+            $body = [
+                'network' => $request->input('network_id'),
+                'mobile_number' => $request->input('mobile_number'),
+                'plan' => $request->input('plan_id'),
+                'Ported_number' => true,
+            ];
+
+            $response = Http::withHeaders($headers)->post($url, $body);
+
+            $responseData = $response->json(); // Return the JSON response from the API
+
+            return response()->json([
+                "data" =>  $responseData
+            ], 200);
+        } catch (\Throwable $e) {
+            # code...
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function fetchDataTransaction()
+    {
+        try { 
+             $url = 'https://bytebridge.com.ng/api/data/';
+        
+            $response = Http::get($url);
+    
+            // return $response->json(); // Return the JSON response from the API
+            $responseData = $response->json(); // Return the JSON response from the API
+
+            return response()->json([
+                "data" =>  $responseData
+            ], 200);
+        } catch (\Throwable $e) {
+            # code...
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    public function fetchDataTransactionSingle(Request $request)
+    {
+        try { 
+            $request->validate([
+                'id' => 'required|string',
+           
+            ]);
+            $id = $request->id;
+             $url = "https://bytebridge.com.ng/api/data/$id";
+        
+            $response = Http::get($url);
+    
+            // return $response->json(); // Return the JSON response from the API
+            $responseData = $response->json(); // Return the JSON response from the API
+
+            return response()->json([
+                "data" =>  $responseData
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 }

@@ -39,3 +39,7 @@ Route::post('/auth/addMoney/', [UserController::class, 'addMoney']);
 Route::post('/auth/transactionGet/', [UserController::class, 'transactionGet']);
 Route::post('/auth/transactionGetALL/', [UserController::class, 'transactionGetALL']);
 Route::post('/auth/listUser/', [UserController::class, 'listUser']);
+Route::post('/auth/UserdetailsByteBridge/', [UserController::class, 'UserdetailsByteBridge']);
+Route::post('/auth/BuyData/', [UserController::class, 'BuyData']);
+Route::post('/auth/fetchDataTransaction/', [UserController::class, 'fetchDataTransaction']);
+Route::post('/auth/fetchDataTransactionSingle/', [UserController::class, 'fetchDataTransactionSingle']);
