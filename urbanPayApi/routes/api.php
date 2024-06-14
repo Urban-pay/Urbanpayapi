@@ -43,3 +43,4 @@ Route::post('/auth/UserdetailsByteBridge/', [UserController::class, 'Userdetails
 Route::post('/auth/BuyData/', [UserController::class, 'BuyData']);
 Route::post('/auth/fetchDataTransaction/', [UserController::class, 'fetchDataTransaction']);
 Route::post('/auth/fetchDataTransactionSingle/', [UserController::class, 'fetchDataTransactionSingle']);
+Route::post('/auth/topUp/', [UserController::class, 'topUp']);

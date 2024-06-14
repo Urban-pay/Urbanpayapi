@@ -41,7 +41,7 @@ class UserController extends Controller
 
     public function createUser(Request $request)
     {
-        try {
+        // try {
             $validatedData = $request->validate([
                 'name' => 'nullable|string|max:255',
                 'email' => 'nullable|string|email|max:255|unique:users',
@@ -130,69 +130,18 @@ class UserController extends Controller
                     return response()->json(['message' => 'User not found'], 404);
                 }
 
-
-
                 // Store OTP in the database with the user's email
                 // $user->otp = $otp;
                 $user->save();
-                $user->delete();
+                // $user->delete();
 
                 // Send email to user containing the OTP
                 Mail::to($user->email)->send(new OtpVerificationMail($user->otp));
 
-
-
-
                 try {
 
                     // create customers
-                    // spliting fullname
-                    $string = $user->name;
-                    $words = explode(' ', $string); // Split the string into an array of words
-                    $firstname = $words[0]; // First word
-                    $lastname = $words[1]; // Second word
-
-                    $response = Http::withHeaders([
-                        'accept' => 'application/json',
-                        'content-type' => 'application/json',
-                        'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
-                    ])->post('https://api.sandbox.getanchor.co/api/v1/customers', [
-                        'data' => [
-                            'type' => 'IndividualCustomer',
-                            'attributes' => [
-                                'fullName' => [
-                                    'firstName' => 'Toluwanimi',
-                                    'lastName' => 'Adejumobi',
-                                    'middleName' => 'ephraim',
-                                ],
-                                'email' => 'adejumobitoluwanimi22@gmail.com',
-                                'phoneNumber' => '09030388749',
-                                'address' => [
-                                    'addressLine_1' => '36 Araromi Street',
-                                    'addressLine_2' => 'Onike',
-                                    'country' => 'NG',
-                                    'city' => 'Lagos',
-                                    'postalCode' => 'NA',
-                                    'state' => 'Lagos',
-                                ],
-                                'isSoleProprietor' => true,
-                                'description' => 'string',
-                                'doingBusinessAs' => 'Toluwanimi Adejumobi INC',
-                                'identificationLevel2' => [
-                                    'gender' => 'Male',
-                                    'dateOfBirth' => '1994-06-25',
-                                    'selfieImage' => 'bxxvxvxbvasbbxvxvx=',
-                                    'bvn' => '22222222229',
-                                ],
-                                'identificationLevel3' => [
-                                    'idType' => 'DRIVERS_LICENSE',
-                                    'idNumber' => 'DL123456789',
-                                    'expiryDate' => '2023-06-25',
-                                ],
-                            ],
-                        ],
-                    ]);
-                    // 'data' => [
+                        // 'data' => [
                     //     'type' => 'IndividualCustomer',
                     //     'attributes' => [
                     //         'fullName' => [
@@ -226,6 +175,53 @@ class UserController extends Controller
                     //         ],
                     //     ],
                     // ],
+                    // spliting fullname
+                    $string = $user->name;
+                    $words = explode(' ', $string); // Split the string into an array of words
+                    $firstname = $words[0]; // First word
+                    $lastname = $words[1]; // Second word
+
+                    $response = Http::withHeaders([
+                        'accept' => 'application/json',
+                        'content-type' => 'application/json',
+                        'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
+                    ])->post('https://api.sandbox.getanchor.co/api/v1/customers', [
+                        'data' => [
+                            'type' => 'IndividualCustomer',
+                            'attributes' => [
+                                'fullName' => [
+                                    'firstName' => 'Toluwanimi',
+                                    'lastName' => 'Adejumobi',
+                                    'middleName' => 'ephraim',
+                                ],
+                                'email' => 'adejumobitoluwanimi44@gmail.com',
+                                'phoneNumber' => '09190484599',
+                                'address' => [
+                                    'addressLine_1' => '36 Araromi Street',
+                                    'addressLine_2' => 'Onike',
+                                    'country' => 'NG',
+                                    'city' => 'Lagos',
+                                    'postalCode' => 'NA',
+                                    'state' => 'Lagos',
+                                ],
+                                'isSoleProprietor' => true,
+                                'description' => 'string',
+                                'doingBusinessAs' => 'Toluwanimi Adejumobi INC',
+                                'identificationLevel2' => [
+                                    'gender' => 'Male',
+                                    'dateOfBirth' => '1994-06-25',
+                                    'selfieImage' => 'bxxvxvxbvasbbxvxvx=',
+                                    'bvn' => '76454985720',
+                                ],
+                                'identificationLevel3' => [
+                                    'idType' => 'DRIVERS_LICENSE',
+                                    'idNumber' => 'DL123456789',
+                                    'expiryDate' => '2023-06-25',
+                                ],
+                            ],
+                        ],
+                    ]);
+
                     $responseData = $response->json(); // Return JSON response from the API
 
                     // verify kyc
@@ -236,7 +232,7 @@ class UserController extends Controller
                             "attributes" => [
                                 "level" => "TIER_2",
                                 "level2" => [
-                                    "bvn" => "22222222226",
+                                    "bvn" => "76454985720",
                                     "selfie" => "bxxvxvxbvasbbxvxvx=",
                                     "dateOfBirth" => "1994-06-25",
                                     "gender" => "Male"
@@ -256,6 +252,7 @@ class UserController extends Controller
                     ];
                     $response3 = Http::withHeaders($headers)->post($url, $body);
                     $responseData3 = $response3->json();
+
 
 
                     // create deposit account
@@ -284,48 +281,45 @@ class UserController extends Controller
 
 
                     // fetch deposit account
-                    $url = 'https://api.sandbox.getanchor.co/api/v1/accounts/' . $responseData['data']['id'] . '?include=DepositAccount';
+                    $url = 'https://api.sandbox.getanchor.co/api/v1/accounts/' . $responseData1['data']['id'] . '?include=DepositAccount';
                     $response4 = Http::withHeaders([
                         'accept' => 'application/json',
                         'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
                     ])->get($url);
                     $responseData4 = $response4->json(); // Return JSON response from the API
 
-
                     // get virtualnuban
-                    $url = "https://api.sandbox.getanchor.co/api/v1/virtual-nubans/" . $responseData4['data']['virtualNubans']['data']['id'] . "";
+                    $url = "https://api.sandbox.getanchor.co/api/v1/virtual-nubans/" . $responseData4['data']['relationships']['virtualNubans']['data'][0]['id'] . "";
                     $response5 = Http::withHeaders([
                         'accept' => 'application/json',
                         'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8',
                     ])->get($url);
                     $responseData5 = $response5->json(); // Return JSON response from the API
 
-                    // return $response->json(); // Return the JSON response
 
                     // save data to database
-                    $request->session()->put('balance', $responseData1['data']['availableBalance']);
+                    $request->session()->put('balance', 0);
                     $request->session()->put('user_id', $responseData['data']['id']);
                     $request->session()->put('wallet_id', $responseData1['data']['id']);
                     $request->session()->put('virtual_id', $responseData5['data']['id']);
                     $request->session()->put('bearer', 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8');
-
 
                     $wallet = wallet::create([
                         'user_id' => $responseData['data']['id'],
                         'wallet_id' => $responseData1['data']['id'],
                         'transaction_id' => rand(),
                         'acct_id' => $responseData5['data']['id'],
-                        'account_name' => $responseData5['data']['accountName'],
+                        'account_name' => $responseData5['data']['attributes']['accountName'],
                         'urbanPayTag' => $validatedData['username'],
-                        'account_email' => $responseData['email'],
-                        'account_number' => $responseData5['data']['accountNumber'],
-                        'currency' => $responseData5['data']['currency'],
-                        'bank_id' => $responseData5['data']['bank']['id'],
-                        'bank_name' => $responseData5['data']['bank']['name'],
-                        'bank_code' => $responseData5['data']['bank']['nipCode'],
-                        'balance' => $responseData1['data']['availableBalance'],
+                        'account_email' => $responseData['data']['attributes']['email'],
+                        'account_number' => $responseData5['data']['attributes']['accountNumber'],
+                        'currency' => $responseData5['data']['attributes']['currency'],
+                        'bank_id' => $responseData5['data']['attributes']['bank']['id'],
+                        'bank_name' => $responseData5['data']['attributes']['bank']['name'],
+                        'bank_code' => $responseData5['data']['attributes']['bank']['nipCode'],
+                        'balance' => 0.0,
                         'account_reference' => 'null',
-                        'status' => $responseData5['data']['status'],
+                        'status' => $responseData5['data']['attributes']['status'],
                     ]);
 
                     $notification = notifications::create([
@@ -339,7 +333,8 @@ class UserController extends Controller
                     return response()->json([
                         'data' => $responseData,
                         'data1' => $responseData1,
-                        'data3' => $responseData3
+                        'data3' => $responseData3,
+                        'data4' => $responseData4,
                     ]);
                 } catch (\GuzzleHttp\Exception\RequestException $e) {
                     if ($e->hasResponse()) {
@@ -363,12 +358,12 @@ class UserController extends Controller
                     'message' => 'pin must be 5 digits'
                 ], 500);
             }
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage()
-            ], 500);
-        }
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'status' => false,
+        //         'message' => $th->getMessage()
+        //     ], 500);
+        // }
     }
 
     /**
@@ -384,9 +379,10 @@ class UserController extends Controller
                 'email' => 'required|string|email',
                 'password' => 'required|string',
             ]);
+            $user = User::where('email', $request->email)->first();
 
-            if (Auth::attempt($credentials)) {
-                $user = Auth::user();
+            if ($user) {
+                // $user = Auth::user();
                 $request->session()->put('email', $user->email);
                 $request->session()->put('name', $user->name);
                 $request->session()->put('username', $user->username);
@@ -418,12 +414,13 @@ class UserController extends Controller
 
                 // Send email to user containing the OTP
                 Mail::to($user->email)->send(new OtpVerificationMail($user->otp));
+             
 
                 // inserting notifcation
                 $title = "Welcome back, {$user->firstName} {$user->lastName}";
                 $msg = 'You have successfully logged in.';
                 $notification = notifications::create([
-                    'user_id' => $request->session->get('user_id'),
+                    'user_id' => $request->session()->get('user_id'),
                     'title' => $title,
                     'message' => $msg
                 ]);
@@ -463,6 +460,17 @@ class UserController extends Controller
                 }
 
                 // User is authenticated, return success response
+                // inserting notifcation
+                $title = "Welcome back, {$user->firstName} {$user->lastName}";
+                $msg = 'You have successfully logged in.';
+                $notification = notifications::create([
+                    'user_id' => $request->session()->get('user_id'),
+                    'title' => $title,
+                    'message' => $msg
+                ]);
+                // Send notfication email to user containing the OTP
+                Mail::to($user->email)->send(new notificationMail($title, $msg));
+       
                 return response()->json(['message' => 'Login successful', 'user' => $user]);
             } else {
                 # code...
@@ -523,13 +531,13 @@ class UserController extends Controller
                 'accept' => 'application/json',
                 'content-type' => 'application/json',
                 'x-anchor-key' => 'y9k7N.79abd6fa47555b6c8b79f74ac55c7d9da5287687b2b2a1573f9c0869f06ec5ee55b892e3b9c64ecfe24912bdda1c0d993ca8'
-            ])->get('https://api.sandbox.getanchor.co/api/v1/customers/'. $request->session->get('user_id') .'');
+            ])->get('https://api.sandbox.getanchor.co/api/v1/customers/'. $request->session()->get('user_id') .'');
             $responseData = $response->json();
             // inserting notifcation
             $title = "User Deleted";
             $msg = 'The user has been successfully deleted.';
             $notification = notifications::create([
-                'user_id' => $request->session->get('user_id'),
+                'user_id' => $request->session()->get('user_id'),
                 'title' => $title,
                 'message' => $msg
             ]);
@@ -622,7 +630,7 @@ class UserController extends Controller
                $title = "Profile Updated Successfully!";
                $msg = 'Profile Updated Successfully!';
                $notification = notifications::create([
-                   'user_id' => $request->session->get('user_id'),
+                   'user_id' => $request->session()->get('user_id'),
                    'title' => $title,
                    'message' => $msg
                ]);
@@ -735,7 +743,7 @@ class UserController extends Controller
                     $title = "Profile Updated Successfully!";
                     $msg = 'Profile Updated Successfully!';
                     $notification = notifications::create([
-                        'user_id' => $request->session->get('user_id'),
+                        'user_id' => $request->session()->get('user_id'),
                         'title' => $title,
                         'message' => $msg
                     ]);
@@ -745,7 +753,7 @@ class UserController extends Controller
             $title = "Pin Updated Successfully!";
             $msg = 'Pin Updated Successfully!';
             $notification = notifications::create([
-                'user_id' => $request->session->get('user_id'),
+                'user_id' => $request->session()->get('user_id'),
                 'title' => $title,
                 'message' => $msg
             ]);
@@ -875,12 +883,12 @@ class UserController extends Controller
     public function sendMoney(Request $request)
     {
 
-        try {
+        // try {
 
-            try {
+            // try {
 
                 // get accountid from session
-                $acct_id = '17164168624170-anc_acc';
+                // $acct_id = '17164168624170-anc_acc';
                 $acct_id = $request->session()->get('wallet_id');
 
                 $wallet = wallet::where('wallet_id', $acct_id);
@@ -969,8 +977,8 @@ class UserController extends Controller
 
                 $responseData3 = $response3->json(); // Return the JSON response from the API
 
-                $urbanPayTag = 'sam';
-                // $wallet->urbanPayTag = 'sam';
+                // $urbanPayTag = 'sam';
+                $wallet->urbanPayTag = 'urbanpay-tolu';
 
                 $transaction = transaction::create([
                     'user_id' =>'17164158629698-anc_ind_cst',
@@ -1008,7 +1016,8 @@ class UserController extends Controller
                     'bank_name' => $request->bank_name,
                     'account_number' => $request->accountNumber,
                     'account_name' => $request->account_name,
-                    'urbanPayTag' => $urbanPayTag,
+                    'urbanPayTag' => $wallet->urbanPayTag,
+                    // 'urbanPayTag' => $urbanPayTag,
                 ]);
                 // fetching balance
                 $url = 'https://api.sandbox.getanchor.co/api/v1/accounts/balance/' . $acct_id;
@@ -1023,7 +1032,7 @@ class UserController extends Controller
                 $title = "Transfer Successful";
                 $msg = "Your payment of NGN {$request->amount} to " . $responseData1['data']['attributes']['accountName'] ." has been processed successfully. Your new balance is NGN ". $responseData4['data']['availableBalance'] ." ";
                 $notification = notifications::create([
-                    'user_id' => $request->session->get('user_id'),
+                    'user_id' => $request->session()->get('user_id'),
                     'title' => $title,
                     'message' => $msg
                 ]);
@@ -1036,18 +1045,18 @@ class UserController extends Controller
                     'data2' => $responseData2,
                     'data3' => $responseData3
                 ], 500);
-            } catch (\Throwable $e) {
-                return response()->json([
-                    'status' => false,
-                    'message' => $e->getMessage()
-                ], 500);
-            }
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage()
-            ], 500);
-        }
+            // } catch (\Throwable $e) {
+            //     return response()->json([
+            //         'status' => false,
+            //         'message' => $e->getMessage()
+            //     ], 500);
+            // }
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'status' => false,
+        //         'message' => $th->getMessage()
+        //     ], 500);
+        // }
     }
 
     public function sendMoneyWithTag(Request $request)
@@ -1290,7 +1299,7 @@ class UserController extends Controller
                 'Authorization' => "Token {$token}",
                 'Content-Type' => 'application/json',
             ])->get($url);
-    
+
             $responseData = $response->json(); // Return the JSON response from the API
 
             return response()->json([
@@ -1307,12 +1316,18 @@ class UserController extends Controller
     {
         try {
             $url = 'https://bytebridge.com.ng/api/data/';
-        
+
             $headers = [
                 'Authorization' => 'Token e3822593c7c9f818b613cbd9d5bd078d3fdf7de4',
                 'Content-Type' => 'application/json',
             ];
-            
+
+            $request->validate([
+                'network_id' => 'required|string',
+                'mobile_number' => 'required|string',
+                'plan_id' => 'required|string',
+            ]);
+
             $body = [
                 'network' => $request->input('network_id'),
                 'mobile_number' => $request->input('mobile_number'),
@@ -1336,11 +1351,11 @@ class UserController extends Controller
     }
     public function fetchDataTransaction()
     {
-        try { 
+        try {
              $url = 'https://bytebridge.com.ng/api/data/';
-        
+
             $response = Http::get($url);
-    
+
             // return $response->json(); // Return the JSON response from the API
             $responseData = $response->json(); // Return the JSON response from the API
 
@@ -1354,19 +1369,19 @@ class UserController extends Controller
             ], 500);
         }
     }
-    
+
     public function fetchDataTransactionSingle(Request $request)
     {
-        try { 
+        try {
             $request->validate([
                 'id' => 'required|string',
-           
+
             ]);
             $id = $request->id;
              $url = "https://bytebridge.com.ng/api/data/$id";
-        
+
             $response = Http::get($url);
-    
+
             // return $response->json(); // Return the JSON response from the API
             $responseData = $response->json(); // Return the JSON response from the API
 
@@ -1379,6 +1394,45 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    public function topUp(Request $request)
+    {
+
+        try {
+            $request->validate([
+                'network_id' => 'required|string',
+                'mobile_number' => 'required|string',
+                'plan_id' => 'required|string',
+            ]);
+            $url = 'https://bytebridge.com.ng/api/topup/';
+
+            $headers = [
+                'Authorization' => 'Token 66f2e5c39ac8640f13cd888f161385b12f7e5e92',
+                'Content-Type' => 'application/json'
+            ];
+
+            $body = [
+                'network' => $request->input('network_id'),
+                'amount' => $request->input('amount'),
+                'mobile_number' => $request->input('phone'),
+                'Ported_number' => true,
+                'airtime_type' => 'VTU'
+            ];
+
+            $response = Http::withHeaders($headers)->post($url, $body);
+
+            $responseData = $response->json(); // Return the JSON response from the API
+
+            return response()->json([
+                "data" =>  $responseData
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 
 }

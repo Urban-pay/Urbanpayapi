@@ -32,7 +32,7 @@ class notificationMail extends Mailable
     {
         return new Envelope(
             from: new Address('distressproperties@uptechng.com', 'Urbanpay'),
-            subject: 'Pin Verification',
+            subject: 'Information About Your UrbanPay Account',
         );
     
     }
