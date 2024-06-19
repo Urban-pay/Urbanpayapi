@@ -20,7 +20,7 @@ Route::get('/', function () {
 Route::get('/run-migrations', function () {
 
    Artisan::call(('optimize:clear'));
-   Artisan::call(('migrate:fresh --seed'));
+   Artisan::call(('migrate:refresh --seed'));
 
    return "migrations executed successfully";
 });
