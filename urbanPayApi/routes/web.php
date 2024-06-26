@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,11 +16,3 @@ use Illuminate\Support\Facades\Artisan;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/run-migrations', function () {
-
-   Artisan::call(('optimize:clear'));
-   Artisan::call(('migrate:refresh --seed'));
-
-   return "migrations executed successfully";
-});
-
